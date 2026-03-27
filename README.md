@@ -695,18 +695,20 @@ AverraThemeManager::instance()->setAccentPressedColor(QColor(QStringLiteral("#1F
 展示方式采用：
 
 - 左侧分类导航
-- 右侧分类页面切换
+- 右侧场景页面切换
+- 按任务搜索并推荐最合适的分类入口
 
 当前分类包括：
 
-- 操作与工具栏
-- 输入组件
-- 筛选与选择
-- 数据展示
-- 反馈与状态
-- 布局与页面
+- 选型指南
+- 页面头部与操作
+- 表单录入与搜索
+- 筛选切换与参数
+- 数据工作流
+- 反馈提示与状态
+- 页面布局与容器
 
-这种结构更适合持续扩展组件，而不会退化成一个无限向下滚动的大页面。
+这种结构更适合让接入者先按页面任务选型，再回到具体控件实现。
 
 ## 测试策略
 
@@ -731,39 +733,6 @@ AverraThemeManager::instance()->setAccentPressedColor(QColor(QStringLiteral("#1F
 - `resources/`：内置资源
 - `examples/gallery/`：纯代码控件预览程序
 - `tests/`：统一 `Qt Test` 单元测试
-- `docs/`：路线和架构说明
+- `docs/`：发布、路线和场景选型说明
 - `AverraWidgets.pro`：qmake 顶层子工程入口
 - `AverraWidgets.pri`：外部 qmake 工程接入入口
-
-## 当前构建策略
-
-- `CMake` 仍是安装导出和跨工程集成的主入口
-- `qmake` 用于兼容典型 Qt Widgets 工程、快速联调和示例运行
-- `CMake` 与 `qmake` 构建产物统一收敛到固定目录 `build/`
-- `qmake` 构建产物默认输出到 `build/qmake/` 下的 `lib/` 与 `bin/`
-
-## 当前状态
-
-当前仓库已经通过以下目标的编译验证：
-
-- `libAverraWidgets.so`
-- `AverraGallery`
-- `AverraWidgetsTests`
-
-这保证了：
-
-- 组件库本体可编译
-- Gallery 可编译
-- 统一测试工程可编译
-
-## 路线
-
-当前已完成基础控件、复合页面组件、设置页结构、数据展示与反馈体系的第一阶段。
-
-下一阶段：
-
-- 数据展示类控件
-
-后续方向：
-
-- 商业发行包和安装文档
