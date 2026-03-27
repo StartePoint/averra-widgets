@@ -26,9 +26,9 @@ macx {
 }
 
 win32:CONFIG(release, debug|release) {
-    LIBS += -L$$AVERRA_LIB_DIR -lAverraWidgets
+    LIBS += -L$$AVERRA_LIB_DIR -lAverraWidgets1
 }
 
 win32:CONFIG(debug, debug|release) {
-    LIBS += -L$$AVERRA_LIB_DIR -lAverraWidgets
+    LIBS += -L$$AVERRA_LIB_DIR -lAverraWidgets1
 }
