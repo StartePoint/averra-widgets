@@ -29,11 +29,12 @@ AverraRadioButton::AverraRadioButton(const QString &text, QWidget *parent)
 
 QSize AverraRadioButton::sizeHint() const
 {
+    const AverraStyleProfile styleProfile = AverraThemeManager::instance()->styleProfile();
     QFontMetrics metrics(font());
-    const int circleSize = 18;
-    const int spacing = 10;
+    const int circleSize = qMax(16, styleProfile.controlRadius() + 6);
+    const int spacing = styleProfile.compactPaddingHorizontal();
     const int width = circleSize + spacing + metrics.horizontalAdvance(text()) + 6;
-    const int height = qMax(circleSize, metrics.height()) + 8;
+    const int height = qMax(circleSize, metrics.height()) + styleProfile.compactPaddingVertical() + 3;
     return QSize(width, height);
 }
 
@@ -42,6 +43,7 @@ void AverraRadioButton::paintEvent(QPaintEvent *event)
     Q_UNUSED(event)
 
     const AverraThemePalette palette = AverraThemeManager::instance()->palette();
+    const AverraStyleProfile styleProfile = AverraThemeManager::instance()->styleProfile();
     QColor circleBackground = palette.surfaceRaisedColor();
     QColor circleBorder = palette.borderColor();
     QColor textColor = palette.textPrimaryColor();
@@ -60,8 +62,8 @@ void AverraRadioButton::paintEvent(QPaintEvent *event)
     QPainter painter(this);
     painter.setRenderHint(QPainter::Antialiasing, true);
 
-    const int circleSize = 18;
-    const int spacing = 10;
+    const int circleSize = qMax(16, styleProfile.controlRadius() + 6);
+    const int spacing = styleProfile.compactPaddingHorizontal();
     const int circleY = (height() - circleSize) / 2;
     const QRectF circleRect(0.0, static_cast<qreal>(circleY), static_cast<qreal>(circleSize), static_cast<qreal>(circleSize));
 
@@ -72,7 +74,9 @@ void AverraRadioButton::paintEvent(QPaintEvent *event)
     if (isChecked()) {
         painter.setPen(Qt::NoPen);
         painter.setBrush(palette.accentColor());
-        painter.drawEllipse(QRectF(5.0, circleY + 5.0, 8.0, 8.0));
+        const qreal dotSize = qMax<qreal>(6.0, circleSize * 0.42);
+        const qreal dotOffset = (circleSize - dotSize) / 2.0;
+        painter.drawEllipse(QRectF(dotOffset, circleY + dotOffset, dotSize, dotSize));
     }
 
     painter.setPen(textColor);
@@ -115,4 +119,3 @@ void AverraRadioButton::handleThemeChanged()
 {
     update();
 }
-

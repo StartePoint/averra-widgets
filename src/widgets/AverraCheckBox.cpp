@@ -29,11 +29,12 @@ AverraCheckBox::AverraCheckBox(const QString &text, QWidget *parent)
 
 QSize AverraCheckBox::sizeHint() const
 {
+    const AverraStyleProfile styleProfile = AverraThemeManager::instance()->styleProfile();
     QFontMetrics metrics(font());
-    const int boxSize = 18;
-    const int spacing = 10;
+    const int boxSize = qMax(16, styleProfile.controlRadius() + 6);
+    const int spacing = styleProfile.compactPaddingHorizontal();
     const int width = boxSize + spacing + metrics.horizontalAdvance(text()) + 6;
-    const int height = qMax(boxSize, metrics.height()) + 8;
+    const int height = qMax(boxSize, metrics.height()) + styleProfile.compactPaddingVertical() + 3;
     return QSize(width, height);
 }
 
@@ -42,6 +43,7 @@ void AverraCheckBox::paintEvent(QPaintEvent *event)
     Q_UNUSED(event)
 
     const AverraThemePalette palette = AverraThemeManager::instance()->palette();
+    const AverraStyleProfile styleProfile = AverraThemeManager::instance()->styleProfile();
     QColor boxBackground = palette.surfaceRaisedColor();
     QColor boxBorder = palette.borderColor();
     QColor textColor = palette.textPrimaryColor();
@@ -61,14 +63,14 @@ void AverraCheckBox::paintEvent(QPaintEvent *event)
     QPainter painter(this);
     painter.setRenderHint(QPainter::Antialiasing, true);
 
-    const int boxSize = 18;
-    const int spacing = 10;
+    const int boxSize = qMax(16, styleProfile.controlRadius() + 6);
+    const int spacing = styleProfile.compactPaddingHorizontal();
     const int boxY = (height() - boxSize) / 2;
     const QRectF boxRect(0.0, static_cast<qreal>(boxY), static_cast<qreal>(boxSize), static_cast<qreal>(boxSize));
 
     painter.setPen(QPen(boxBorder, 1.0));
     painter.setBrush(boxBackground);
-    painter.drawRoundedRect(boxRect, 5.0, 5.0);
+    painter.drawRoundedRect(boxRect, styleProfile.smallRadius(), styleProfile.smallRadius());
 
     if (isChecked()) {
         QPen checkPen(QColor(QStringLiteral("#FFFFFF")), 2.0);

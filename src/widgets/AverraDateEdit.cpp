@@ -22,10 +22,80 @@
 #include <QScreen>
 #include <QShowEvent>
 #include <QSizePolicy>
+#include <QtGlobal>
 #include <QVBoxLayout>
 
 namespace
 {
+int calendarNavigationButtonSize(const AverraStyleProfile &styleProfile)
+{
+    return qMax(24, (styleProfile.buttonPaddingVertical() * 2) + styleProfile.smallFontSize() - 2);
+}
+
+int calendarTodayButtonWidth(const AverraStyleProfile &styleProfile)
+{
+    return qMax(54, calendarNavigationButtonSize(styleProfile) + (styleProfile.buttonPaddingHorizontal() * 2));
+}
+
+int calendarDayButtonWidth(const AverraStyleProfile &styleProfile)
+{
+    return qMax(32, (styleProfile.buttonPaddingVertical() * 2) + styleProfile.bodyFontSize() + 5);
+}
+
+int calendarDayButtonHeight(const AverraStyleProfile &styleProfile)
+{
+    return qMax(28, (styleProfile.buttonPaddingVertical() * 2) + styleProfile.bodyFontSize() + 1);
+}
+
+int calendarHeaderCornerRadius(const AverraStyleProfile &styleProfile)
+{
+    return qMax(4, styleProfile.controlRadius() - 3);
+}
+
+int calendarDayCornerRadius(const AverraStyleProfile &styleProfile)
+{
+    return qMax(6, styleProfile.controlRadius() - 2);
+}
+
+int calendarPopupRadius(const AverraStyleProfile &styleProfile)
+{
+    return qMax(10, styleProfile.panelRadius() - 4);
+}
+
+int calendarOuterPadding(const AverraStyleProfile &styleProfile)
+{
+    return qMax(10, styleProfile.buttonPaddingHorizontal() - 6);
+}
+
+int calendarRootSpacing(const AverraStyleProfile &styleProfile)
+{
+    return styleProfile.compactPaddingHorizontal();
+}
+
+int calendarGridSpacing(const AverraStyleProfile &styleProfile)
+{
+    return qMax(2, styleProfile.compactPaddingVertical() - 3);
+}
+
+int calendarPopupMinWidth(const AverraStyleProfile &styleProfile)
+{
+    return qMax(280,
+                (calendarDayButtonWidth(styleProfile) * 7)
+                    + (calendarGridSpacing(styleProfile) * 6)
+                    + (calendarOuterPadding(styleProfile) * 2)
+                    + 10);
+}
+
+int dateEditMinimumHeightForProfile(const AverraStyleProfile &styleProfile)
+{
+    return qMax(32, (styleProfile.buttonPaddingVertical() * 2) + styleProfile.bodyFontSize() + 9);
+}
+
+int dateEditDropDownHitWidth(const AverraStyleProfile &styleProfile)
+{
+    return qMax(24, styleProfile.buttonPaddingHorizontal() + styleProfile.compactPaddingHorizontal() + 6);
+}
+
 class AverraCalendarHeaderButton : public QAbstractButton
 {
 public:
@@ -74,11 +144,14 @@ public:
 
     QSize sizeHint() const override
     {
+        const AverraStyleProfile styleProfile = AverraThemeManager::instance()->styleProfile();
+        const int squareSize = calendarNavigationButtonSize(styleProfile);
+
         if (m_role == TodayRole) {
-            return QSize(66, 30);
+            return QSize(calendarTodayButtonWidth(styleProfile), squareSize);
         }
 
-        return QSize(30, 30);
+        return QSize(squareSize, squareSize);
     }
 
 protected:
@@ -111,6 +184,7 @@ protected:
         Q_UNUSED(event)
 
         const AverraThemePalette palette = AverraThemeManager::instance()->palette();
+        const AverraStyleProfile styleProfile = AverraThemeManager::instance()->styleProfile();
         QPainter painter(this);
         painter.setRenderHint(QPainter::Antialiasing, true);
 
@@ -135,11 +209,14 @@ protected:
 
         painter.setPen(QPen(borderColor, 1.0));
         painter.setBrush(backgroundColor);
-        painter.drawRoundedRect(buttonRect, 9.0, 9.0);
+        painter.drawRoundedRect(buttonRect,
+                                calendarHeaderCornerRadius(styleProfile),
+                                calendarHeaderCornerRadius(styleProfile));
 
         if (m_role == TodayRole) {
             QFont font = painter.font();
             font.setBold(true);
+            font.setPointSize(styleProfile.smallFontSize());
             painter.setFont(font);
             painter.setPen(textColor);
             painter.drawText(rect(), Qt::AlignCenter, text());
@@ -243,7 +320,8 @@ public:
 
     QSize sizeHint() const override
     {
-        return QSize(38, 34);
+        const AverraStyleProfile styleProfile = AverraThemeManager::instance()->styleProfile();
+        return QSize(calendarDayButtonWidth(styleProfile), calendarDayButtonHeight(styleProfile));
     }
 
 protected:
@@ -276,6 +354,7 @@ protected:
         Q_UNUSED(event)
 
         const AverraThemePalette palette = AverraThemeManager::instance()->palette();
+        const AverraStyleProfile styleProfile = AverraThemeManager::instance()->styleProfile();
         QPainter painter(this);
         painter.setRenderHint(QPainter::Antialiasing, true);
 
@@ -306,17 +385,22 @@ protected:
         if (backgroundColor.alpha() > 0) {
             painter.setPen(Qt::NoPen);
             painter.setBrush(backgroundColor);
-            painter.drawRoundedRect(cellRect, 10.0, 10.0);
+            painter.drawRoundedRect(cellRect,
+                                    calendarDayCornerRadius(styleProfile),
+                                    calendarDayCornerRadius(styleProfile));
         }
 
         if (borderColor.alpha() > 0) {
             painter.setPen(QPen(borderColor, 1.2));
             painter.setBrush(Qt::NoBrush);
-            painter.drawRoundedRect(cellRect, 10.0, 10.0);
+            painter.drawRoundedRect(cellRect,
+                                    calendarDayCornerRadius(styleProfile),
+                                    calendarDayCornerRadius(styleProfile));
         }
 
         QFont font = painter.font();
         font.setBold(m_selected || m_today);
+        font.setPointSize(styleProfile.bodyFontSize());
         painter.setFont(font);
         painter.setPen(textColor);
         painter.drawText(rect(), Qt::AlignCenter, QString::number(m_date.day()));
@@ -462,13 +546,16 @@ void AverraDatePopup::paintEvent(QPaintEvent *event)
     Q_UNUSED(event)
 
     const AverraThemePalette palette = AverraThemeManager::instance()->palette();
+    const AverraStyleProfile styleProfile = AverraThemeManager::instance()->styleProfile();
     QPainter painter(this);
     painter.setRenderHint(QPainter::Antialiasing, true);
 
     QRectF popupRect = rect().adjusted(0.5, 0.5, -0.5, -0.5);
     painter.setPen(QPen(palette.borderColor(), 1.0));
     painter.setBrush(palette.surfaceRaisedColor());
-    painter.drawRoundedRect(popupRect, 18.0, 18.0);
+    painter.drawRoundedRect(popupRect,
+                            calendarPopupRadius(styleProfile),
+                            calendarPopupRadius(styleProfile));
 }
 
 void AverraDatePopup::initialize()
@@ -477,7 +564,7 @@ void AverraDatePopup::initialize()
     setWindowFlags(Qt::Popup | Qt::FramelessWindowHint);
     setAttribute(Qt::WA_TranslucentBackground, true);
     setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
-    setMinimumWidth(324);
+    setMinimumWidth(calendarPopupMinWidth(AverraThemeManager::instance()->styleProfile()));
 
     m_headerWidget = new QWidget(this);
     m_previousYearButton = new AverraCalendarHeaderButton(AverraCalendarHeaderButton::PreviousYearRole,
@@ -540,8 +627,11 @@ void AverraDatePopup::initialize()
     }
 
     QVBoxLayout *rootLayout = new QVBoxLayout(this);
-    rootLayout->setContentsMargins(12, 12, 12, 12);
-    rootLayout->setSpacing(10);
+    rootLayout->setContentsMargins(calendarOuterPadding(AverraThemeManager::instance()->styleProfile()),
+                                   calendarOuterPadding(AverraThemeManager::instance()->styleProfile()),
+                                   calendarOuterPadding(AverraThemeManager::instance()->styleProfile()),
+                                   calendarOuterPadding(AverraThemeManager::instance()->styleProfile()));
+    rootLayout->setSpacing(calendarRootSpacing(AverraThemeManager::instance()->styleProfile()));
     rootLayout->addWidget(m_headerWidget);
     rootLayout->addWidget(gridWidget);
 
@@ -600,16 +690,41 @@ void AverraDatePopup::initialize()
 void AverraDatePopup::refreshTheme()
 {
     const AverraThemePalette palette = AverraThemeManager::instance()->palette();
+    const AverraStyleProfile styleProfile = AverraThemeManager::instance()->styleProfile();
+    QHBoxLayout *headerLayout = qobject_cast<QHBoxLayout *>(m_headerWidget->layout());
+    QWidget *gridWidget = m_dayButtons.isEmpty() ? nullptr : m_dayButtons.first()->parentWidget();
+    QGridLayout *gridLayout = gridWidget != nullptr ? qobject_cast<QGridLayout *>(gridWidget->layout()) : nullptr;
+    QVBoxLayout *rootLayout = qobject_cast<QVBoxLayout *>(layout());
+
+    if (headerLayout != nullptr) {
+        headerLayout->setSpacing(qMax(6, styleProfile.compactPaddingHorizontal() - 2));
+    }
+
+    if (gridLayout != nullptr) {
+        gridLayout->setHorizontalSpacing(calendarGridSpacing(styleProfile));
+        gridLayout->setVerticalSpacing(calendarGridSpacing(styleProfile));
+    }
+
+    if (rootLayout != nullptr) {
+        rootLayout->setContentsMargins(calendarOuterPadding(styleProfile),
+                                       calendarOuterPadding(styleProfile),
+                                       calendarOuterPadding(styleProfile),
+                                       calendarOuterPadding(styleProfile));
+        rootLayout->setSpacing(calendarRootSpacing(styleProfile));
+    }
+
+    setMinimumWidth(calendarPopupMinWidth(styleProfile));
 
     m_titleLabel->setStyleSheet(
         QStringLiteral(
             "QLabel#AverraDateEditPopupTitle {"
             "color: %1;"
             "background: transparent;"
-            "font-size: 14px;"
+            "font-size: %2px;"
             "font-weight: 700;"
             "}")
-            .arg(palette.textPrimaryColor().name()));
+            .arg(palette.textPrimaryColor().name(),
+                 QString::number(styleProfile.bodyFontSize() + 1)));
 
     for (int index = 0; index < m_weekdayLabels.size(); ++index) {
         m_weekdayLabels.at(index)->setStyleSheet(
@@ -617,11 +732,13 @@ void AverraDatePopup::refreshTheme()
                 "QLabel#AverraDateEditPopupWeekdayLabel {"
                 "color: %1;"
                 "background: transparent;"
-                "font-size: 11px;"
+                "font-size: %2px;"
                 "font-weight: 700;"
-                "padding: 4px 0;"
+                "padding: %3px 0;"
                 "}")
-                .arg(palette.textSecondaryColor().name()));
+                .arg(palette.textSecondaryColor().name(),
+                     QString::number(styleProfile.smallFontSize() - 1),
+                     QString::number(calendarGridSpacing(styleProfile))));
     }
 
     update();
@@ -831,7 +948,7 @@ void AverraDateEdit::initialize()
     setCalendarPopup(true);
     setDisplayFormat(QStringLiteral("yyyy-MM-dd"));
     setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
-    setMinimumHeight(42);
+    setMinimumHeight(dateEditMinimumHeightForProfile(AverraThemeManager::instance()->styleProfile()));
 
     connect(AverraThemeManager::instance(),
             &AverraThemeManager::paletteChanged,
@@ -850,6 +967,8 @@ void AverraDateEdit::initialize()
 void AverraDateEdit::refreshStyle()
 {
     const AverraThemePalette palette = AverraThemeManager::instance()->palette();
+    const AverraStyleProfile styleProfile = AverraThemeManager::instance()->styleProfile();
+    setMinimumHeight(dateEditMinimumHeightForProfile(styleProfile));
     setStyleSheet(AverraStyleHelper::dateEditStyleSheet(palette, m_accentFrame));
     refreshPopupStyle();
 }
@@ -914,6 +1033,7 @@ bool AverraDateEdit::popupVisible() const
 
 bool AverraDateEdit::dropDownRectContains(const QPoint &position) const
 {
-    const QRect dropDownRect(width() - 34, 0, 34, height());
+    const int dropDownWidth = dateEditDropDownHitWidth(AverraThemeManager::instance()->styleProfile());
+    const QRect dropDownRect(width() - dropDownWidth, 0, dropDownWidth, height());
     return dropDownRect.contains(position);
 }

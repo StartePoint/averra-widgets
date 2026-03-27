@@ -68,11 +68,12 @@ void AverraDivider::setThickness(int thickness)
 
 QSize AverraDivider::sizeHint() const
 {
+    const AverraStyleProfile styleProfile = AverraThemeManager::instance()->styleProfile();
     if (m_orientation == Qt::Horizontal) {
-        return QSize(120, m_thickness);
+        return QSize(120, qMax(m_thickness, styleProfile.smallRadius() > 6 ? 2 : 1));
     }
 
-    return QSize(m_thickness, 24);
+    return QSize(qMax(m_thickness, styleProfile.smallRadius() > 6 ? 2 : 1), 24);
 }
 
 void AverraDivider::paintEvent(QPaintEvent *event)
@@ -113,4 +114,3 @@ void AverraDivider::handleThemeChanged()
 {
     update();
 }
-

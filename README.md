@@ -7,7 +7,7 @@
 - 同时兼容 `CMake` 与 `qmake`
 - 面向 `Qt 5.14.2` 的稳定开发体验
 
-当前仓库已经具备 `1.0.0` 发布所需的可编译、可预览、可测试、可打包基础能力，并以文档中声明的核心接口作为稳定基线。
+当前仓库已经具备 `1.0.1` 发布所需的可编译、可预览、可测试、可打包、可走 GitHub Release 的基础能力，并以文档中声明的核心接口作为稳定基线。
 
 ## 项目定位
 
@@ -32,11 +32,12 @@
 - 统一测试工程，便于集中回归验证
 - 提供字段模型、校验结果和表单状态管理类型
 - 支持 `TreeTable -> InspectorPanel -> 提交/回滚` 的完整工作流示例
+- 提供默认桌面风格参数与 `StyleProfile` 自定义能力
 - 基础控件、复合组件、页面容器逐步齐备
 
 ## 重要说明
 
-- `1.0.0` 起，README 与发布文档中列出的核心接口作为稳定基线维护；扩展组件和示例仍会继续演进。
+- `1.0.1` 起，README 与发布文档中列出的核心接口作为稳定基线维护；扩展组件和示例仍会继续演进。
 - 工程明确围绕 `Qt Widgets` 技术路线设计，所有能力、示例和测试都以 `QWidget` / `QDialog` / `QMainWindow` 场景为中心。
 - 仓库同时维护 `CMake` 与 `qmake` 两套接入方式，其中 `CMake` 是安装导出和跨工程集成的主入口，`qmake` 用于兼容典型 Qt Widgets 工程。
 - 构建产物统一收敛到固定目录 `build/`，其中 `qmake` 产物位于 `build/qmake/`，避免在仓库根目录和子目录中散落生成文件。
@@ -74,6 +75,8 @@
 - 一个可安装的共享库目标 `Averra::Widgets`
 - 一套 `qmake` 顶层工程与 `pri` 接入入口
 - 一套主题管理能力
+- 多套主题色预设：`Ocean`、`Forest`、`Sunset`、`Orchid`
+- 一套默认 `StyleProfile` 与 JSON 文件自定义入口
 - 一套统一字段模型能力：`AverraFieldDefinition`、`AverraFormModel`、`AverraValidationResult`
 - 一个纯代码版 Gallery 示例程序
 - 一个统一的 `Qt Test` 测试工程
@@ -300,7 +303,7 @@ CHANGELOG.md
 新增或准备一个版本记录时，可以执行：
 
 ```bash
-./scripts/prepare_release_record.sh --version 1.0.0 --date 2026-03-27
+./scripts/prepare_release_record.sh --version 1.0.1 --date 2026-03-27
 ```
 
 如果已经准备好了本次版本说明，也可以通过文件注入正文：
@@ -315,6 +318,27 @@ CHANGELOG.md
 - [CMakeLists.txt](/mnt/NewDisk/3rdselftdevlibrary/averra-widgets/CMakeLists.txt)
 - [src/AverraWidgets.pro](/mnt/NewDisk/3rdselftdevlibrary/averra-widgets/src/AverraWidgets.pro)
 - [CHANGELOG.md](/mnt/NewDisk/3rdselftdevlibrary/averra-widgets/CHANGELOG.md)
+
+## GitHub 发布
+
+仓库现在已经补齐 GitHub 发布模式：
+
+- [ci.yml](/mnt/NewDisk/3rdselftdevlibrary/averra-widgets/.github/workflows/ci.yml)：在 `push / pull_request` 上执行构建和测试
+- [release.yml](/mnt/NewDisk/3rdselftdevlibrary/averra-widgets/.github/workflows/release.yml)：在推送 `v*` tag 或手动触发时生成发行制品
+
+正式发布 `1.0.1` 的推荐方式：
+
+```bash
+git tag v1.0.1
+git push origin v1.0.1
+```
+
+工作流会自动：
+
+- 安装 `Qt 5.14.2`
+- 运行 `scripts/package_release.sh`
+- 上传 `dist/` 下的打包产物
+- 在 tag 触发时创建 GitHub Release 并附带制品
 
 ## 验证发行包接入
 
@@ -633,12 +657,65 @@ window->addDockWidget(Qt::RightDockWidgetArea, dock);
 
 - `AverraThemePalette`
 - `AverraThemeManager`
+- `AverraThemeManager::ThemePreset`
+- `AverraStyleProfile`
+
+### 当前可用主题色
+
+- `OceanTheme`
+- `ForestTheme`
+- `SunsetTheme`
+- `OrchidTheme`
+
+### 当前样式入口
+
+- 默认 `StyleProfile` 参数采用当前桌面基线样式
+- 可通过代码直接替换 `AverraStyleProfile`
+- 可通过 JSON 文件加载/保存样式配置
+
+推荐理解方式：
+
+- 主题色决定强调色、语义色和整体气质
+- `StyleProfile` 决定圆角、间距、字号、标题栏行为和动画参数
 
 ### 获取当前主题
 
 ```cpp
 AverraThemePalette palette = AverraThemeManager::instance()->palette();
 ```
+
+### 只切换主题色
+
+```cpp
+AverraThemeManager::instance()->setThemePreset(
+    AverraThemeManager::SunsetTheme);
+```
+
+### 替换样式配置
+
+```cpp
+AverraStyleProfile profile = AverraStyleProfile::createDefaultProfile();
+profile.setControlRadius(10);
+profile.setPanelRadius(18);
+profile.setWindowControlsLayout(AverraStyleProfile::LeadingTrafficLights);
+
+AverraThemeManager::instance()->setStyleProfile(profile);
+```
+
+### 从 JSON 加载样式配置
+
+```cpp
+QString errorMessage;
+if (!AverraThemeManager::instance()->loadStyleProfile(
+        QStringLiteral("docs/style-profile.example.json"),
+        &errorMessage)) {
+    qWarning() << errorMessage;
+}
+```
+
+仓库附带的示例文件见：
+
+- [style-profile.example.json](/mnt/NewDisk/3rdselftdevlibrary/averra-widgets/docs/style-profile.example.json)
 
 ### 整体替换主题
 
@@ -697,6 +774,7 @@ AverraThemeManager::instance()->setAccentPressedColor(QColor(QStringLiteral("#1F
 - 左侧分类导航
 - 右侧场景页面切换
 - 按任务搜索并推荐最合适的分类入口
+- 侧栏主题色快速切换
 
 当前分类包括：
 

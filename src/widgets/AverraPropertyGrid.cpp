@@ -900,33 +900,38 @@ void AverraPropertyGrid::initialize()
 void AverraPropertyGrid::refreshStyle()
 {
     const AverraThemePalette palette = AverraThemeManager::instance()->palette();
+    const AverraStyleProfile styleProfile = AverraThemeManager::instance()->styleProfile();
 
     m_rootFrame->setStyleSheet(
         QStringLiteral(
             "QFrame#AverraPropertyGridRoot {"
             "background-color: %1;"
             "border: 1px solid %2;"
-            "border-radius: 18px;"
+            "border-radius: %3px;"
             "}")
-            .arg(palette.surfaceColor().name(), palette.borderColor().name()));
+            .arg(palette.surfaceColor().name(),
+                 palette.borderColor().name(),
+                 QString::number(styleProfile.panelRadius())));
     m_titleLabel->setStyleSheet(
         QStringLiteral(
             "QLabel#AverraPropertyGridTitle {"
             "color: %1;"
-            "font-size: 18px;"
+            "font-size: %2px;"
             "font-weight: 700;"
             "background: transparent;"
             "}")
-            .arg(palette.textPrimaryColor().name()));
+            .arg(palette.textPrimaryColor().name(),
+                 QString::number(styleProfile.pageTitleFontSize())));
     m_descriptionLabel->setStyleSheet(
         QStringLiteral(
             "QLabel#AverraPropertyGridDescription {"
             "color: %1;"
-            "font-size: 13px;"
+            "font-size: %2px;"
             "font-weight: 500;"
             "background: transparent;"
             "}")
-            .arg(palette.textSecondaryColor().name()));
+            .arg(palette.textSecondaryColor().name(),
+                 QString::number(styleProfile.bodyFontSize())));
     m_contentWidget->setStyleSheet(QStringLiteral("background: transparent;"));
 
     for (int groupIndex = 0; groupIndex < m_groups.size(); ++groupIndex) {
@@ -937,20 +942,22 @@ void AverraPropertyGrid::refreshStyle()
             QStringLiteral(
                 "QLabel#AverraPropertyGridGroupTitle {"
                 "color: %1;"
-                "font-size: 12px;"
+                "font-size: %2px;"
                 "font-weight: 700;"
                 "background: transparent;"
                 "}")
-                .arg(palette.textSecondaryColor().name()));
+                .arg(palette.textSecondaryColor().name(),
+                     QString::number(styleProfile.smallFontSize())));
         group.descriptionLabel->setStyleSheet(
             QStringLiteral(
                 "QLabel#AverraPropertyGridGroupDescription {"
                 "color: %1;"
-                "font-size: 12px;"
+                "font-size: %2px;"
                 "font-weight: 500;"
                 "background: transparent;"
                 "}")
-                .arg(palette.textSecondaryColor().name()));
+                .arg(palette.textSecondaryColor().name(),
+                     QString::number(styleProfile.smallFontSize())));
 
         for (int rowIndex = 0; rowIndex < group.rows.size(); ++rowIndex) {
             const GridRow &row = group.rows.at(rowIndex);
@@ -964,36 +971,41 @@ void AverraPropertyGrid::refreshStyle()
                     "QFrame#AverraPropertyGridRow {"
                     "background-color: %1;"
                     "border: 1px solid %2;"
-                    "border-radius: 14px;"
+                    "border-radius: %3px;"
                     "}")
-                    .arg(surfaceColor.name(), borderColor.name()));
+                    .arg(surfaceColor.name(),
+                         borderColor.name(),
+                         QString::number(styleProfile.largeRadius())));
             row.titleLabel->setStyleSheet(
                 QStringLiteral(
                     "QLabel#AverraPropertyGridRowTitle {"
                     "color: %1;"
-                    "font-size: 13px;"
+                    "font-size: %2px;"
                     "font-weight: 700;"
                     "background: transparent;"
                     "}")
-                    .arg(palette.textPrimaryColor().name()));
+                    .arg(palette.textPrimaryColor().name(),
+                         QString::number(styleProfile.bodyFontSize())));
             row.descriptionLabel->setStyleSheet(
                 QStringLiteral(
                     "QLabel#AverraPropertyGridRowDescription {"
                     "color: %1;"
-                    "font-size: 12px;"
+                    "font-size: %2px;"
                     "font-weight: 500;"
                     "background: transparent;"
                     "}")
-                    .arg(palette.textSecondaryColor().name()));
+                    .arg(palette.textSecondaryColor().name(),
+                         QString::number(styleProfile.smallFontSize())));
             row.validationLabel->setStyleSheet(
                 QStringLiteral(
                     "QLabel#AverraPropertyGridRowValidation {"
                     "color: %1;"
-                    "font-size: 11px;"
+                    "font-size: %2px;"
                     "font-weight: 600;"
                     "background: transparent;"
                     "}")
-                    .arg(validationTextColor(palette, row.validationSeverity).name()));
+                    .arg(validationTextColor(palette, row.validationSeverity).name(),
+                         QString::number(styleProfile.smallFontSize() - 1)));
         }
     }
 }

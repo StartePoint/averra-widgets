@@ -1,4 +1,5 @@
 #include <Averra/AverraDialog.h>
+#include <Averra/AverraThemeManager.h>
 
 #include <QFrame>
 #include <QHBoxLayout>
@@ -12,10 +13,28 @@ class TestAverraDialog : public QObject
     Q_OBJECT
 
 private slots:
+    void init();
+    void cleanup();
     void shouldStoreTitleAndDescription();
     void shouldAllowAddingContentAndFooterWidgets();
-    void shouldUseSquareCornerStyleForNativeWindowFrame();
+    void shouldRefreshFrameStyleForCurrentStyleProfile();
+
+private:
+    AverraThemePalette m_defaultPalette;
 };
+
+void TestAverraDialog::init()
+{
+    m_defaultPalette = AverraThemeManager::instance()->palette();
+    AverraThemeManager::instance()->applyTheme(AverraThemeManager::OceanTheme);
+    AverraThemeManager::instance()->resetStyleProfile();
+}
+
+void TestAverraDialog::cleanup()
+{
+    AverraThemeManager::instance()->setPalette(m_defaultPalette);
+    AverraThemeManager::instance()->resetStyleProfile();
+}
 
 void TestAverraDialog::shouldStoreTitleAndDescription()
 {
@@ -37,13 +56,18 @@ void TestAverraDialog::shouldAllowAddingContentAndFooterWidgets()
     QVERIFY(dialog.footerLayout()->count() >= 2);
 }
 
-void TestAverraDialog::shouldUseSquareCornerStyleForNativeWindowFrame()
+void TestAverraDialog::shouldRefreshFrameStyleForCurrentStyleProfile()
 {
     AverraDialog dialog;
     QFrame *rootFrame = dialog.findChild<QFrame *>(QStringLiteral("AverraDialogRoot"));
 
     QVERIFY(rootFrame != nullptr);
-    QVERIFY(rootFrame->styleSheet().contains(QStringLiteral("border-radius: 0px;")));
+    QVERIFY(rootFrame->styleSheet().contains(QStringLiteral("border-radius: 20px;")));
+
+    AverraStyleProfile compactProfile = AverraStyleProfile::createDefaultProfile();
+    compactProfile.setCardRadius(12);
+    AverraThemeManager::instance()->setStyleProfile(compactProfile);
+    QTRY_VERIFY(rootFrame->styleSheet().contains(QStringLiteral("border-radius: 12px;")));
 }
 
 QObject *createTestAverraDialog()

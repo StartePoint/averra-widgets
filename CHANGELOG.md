@@ -2,6 +2,26 @@
 
 本文件记录 `Averra Widgets` 的公开版本发布内容，便于发布、回滚和接入方核对差异。
 
+## [1.0.1] - 2026-03-27
+
+### Added
+
+- 新增 `AverraStyleProfile` 的 `QVariantMap` 映射与 JSON 文件读写能力
+- 新增 `docs/style-profile.example.json`，提供默认桌面风格参数示例
+- 新增 GitHub Actions 工作流，支持持续集成与 `v*` tag 自动打包发布
+
+### Changed
+
+- 去掉内置 `Win11 / macOS` 风格预设，保留统一 `StyleProfile` 结构并默认使用当前桌面参数
+- `AverraThemeManager` 改为以 `ThemePreset + StyleProfile` 为核心入口，不再暴露 `StylePreset`
+- Gallery 和测试同步切换到 `StyleProfile` 自定义模式
+- 发布文档、README、打包脚本与安装产物统一纳入 `style-profile.example.json` 和 GitHub 发布流程
+
+### Fixed
+
+- 修复 `InfoBar` 样式占位符警告
+- 修复 `Switch` 尺寸测试受自定义样式状态污染的问题
+
 ## [1.0.0] - 2026-03-27
 
 ### Added
@@ -32,4 +52,4 @@
 
 ### Release
 
-- 将 `AverraThemePalette`、`AverraThemeManager`、`AverraIcon`、`AverraFieldDefinition`、`AverraFormModel`、`AverraValidationResult`、`AverraPropertyGrid`、`AverraInspectorPanel`、`AverraTreeTable` 收口为 `1.0.0` 稳定基线
+- 将 `AverraThemePalette`、`AverraThemeManager`、`AverraIcon`、`AverraFieldDefinition`、`AverraFormModel`、`AverraValidationResult`、`AverraPropertyGrid`、`AverraInspectorPanel`、`AverraTreeTable` 收口为 `1.0.1` 前的稳定基线

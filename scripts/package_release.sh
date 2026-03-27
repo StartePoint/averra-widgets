@@ -144,6 +144,7 @@ package_qmake() {
     cmake -E copy_if_different "${ROOT_DIR}/docs/SCENARIO_GUIDE.md" "${sdk_root}/docs/SCENARIO_GUIDE.md"
     cmake -E copy_if_different "${ROOT_DIR}/docs/ROADMAP.md" "${sdk_root}/docs/ROADMAP.md"
     cmake -E copy_if_different "${ROOT_DIR}/docs/RELEASE.md" "${sdk_root}/docs/RELEASE.md"
+    cmake -E copy_if_different "${ROOT_DIR}/docs/style-profile.example.json" "${sdk_root}/docs/style-profile.example.json"
 
     find "${ROOT_DIR}/build/qmake/lib" -maxdepth 1 -type f \
         \( -name 'libAverraWidgets.so*' -o -name 'AverraWidgets.dll' -o -name 'AverraWidgets.lib' -o -name 'libAverraWidgets.dylib' \) \

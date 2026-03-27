@@ -40,6 +40,7 @@ QObject *createTestAverraSettingsPage();
 QObject *createTestAverraSkeleton();
 QObject *createTestAverraSlider();
 QObject *createTestAverraStatisticCard();
+QObject *createTestAverraStyleProfile();
 QObject *createTestAverraSwitch();
 QObject *createTestAverraTabs();
 QObject *createTestAverraTag();
@@ -101,6 +102,7 @@ int main(int argc, char *argv[])
         {"AverraSkeleton", &createTestAverraSkeleton},
         {"AverraSlider", &createTestAverraSlider},
         {"AverraStatisticCard", &createTestAverraStatisticCard},
+        {"AverraStyleProfile", &createTestAverraStyleProfile},
         {"AverraSwitch", &createTestAverraSwitch},
         {"AverraTabs", &createTestAverraTabs},
         {"AverraTag", &createTestAverraTag},

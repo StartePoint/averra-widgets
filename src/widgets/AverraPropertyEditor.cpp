@@ -227,32 +227,37 @@ void AverraPropertyEditor::initialize()
 void AverraPropertyEditor::refreshStyle()
 {
     const AverraThemePalette palette = AverraThemeManager::instance()->palette();
+    const AverraStyleProfile styleProfile = AverraThemeManager::instance()->styleProfile();
     m_rootFrame->setStyleSheet(
         QStringLiteral(
             "QFrame#AverraPropertyEditorRoot {"
             "background-color: %1;"
             "border: 1px solid %2;"
-            "border-radius: 20px;"
+            "border-radius: %3px;"
             "}")
-            .arg(palette.surfaceColor().name(), palette.borderColor().name()));
+            .arg(palette.surfaceColor().name(),
+                 palette.borderColor().name(),
+                 QString::number(styleProfile.pageRadius())));
     m_titleLabel->setStyleSheet(
         QStringLiteral(
             "QLabel#AverraPropertyEditorTitle {"
             "color: %1;"
-            "font-size: 18px;"
+            "font-size: %2px;"
             "font-weight: 700;"
             "background: transparent;"
             "}")
-            .arg(palette.textPrimaryColor().name()));
+            .arg(palette.textPrimaryColor().name(),
+                 QString::number(styleProfile.pageTitleFontSize())));
     m_descriptionLabel->setStyleSheet(
         QStringLiteral(
             "QLabel#AverraPropertyEditorDescription {"
             "color: %1;"
-            "font-size: 13px;"
+            "font-size: %2px;"
             "font-weight: 500;"
             "background: transparent;"
             "}")
-            .arg(palette.textSecondaryColor().name()));
+            .arg(palette.textSecondaryColor().name(),
+                 QString::number(styleProfile.bodyFontSize())));
     m_contentWidget->setStyleSheet(QStringLiteral("background: transparent;"));
 }
 

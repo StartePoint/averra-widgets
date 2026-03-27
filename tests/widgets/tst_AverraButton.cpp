@@ -14,6 +14,7 @@ private slots:
     void shouldUseNonAccentStyleByDefault();
     void shouldEmitAccentChangedWhenAccentToggles();
     void shouldRefreshAccentStyleAfterThemeChange();
+    void shouldRefreshStyleAfterStyleProfileChanges();
     void shouldUseThemeStateColorsInStyleSheet();
 
 private:
@@ -24,11 +25,14 @@ void TestAverraButton::init()
 {
     m_defaultPalette = AverraThemePalette::createLightPalette();
     AverraThemeManager::instance()->setPalette(m_defaultPalette);
+    AverraThemeManager::instance()->applyTheme(AverraThemeManager::OceanTheme);
+    AverraThemeManager::instance()->resetStyleProfile();
 }
 
 void TestAverraButton::cleanup()
 {
     AverraThemeManager::instance()->setPalette(m_defaultPalette);
+    AverraThemeManager::instance()->resetStyleProfile();
 }
 
 void TestAverraButton::shouldUseNonAccentStyleByDefault()
@@ -62,6 +66,28 @@ void TestAverraButton::shouldRefreshAccentStyleAfterThemeChange()
     AverraThemeManager::instance()->setPalette(palette);
 
     QTRY_VERIFY(button.styleSheet().contains(QStringLiteral("#2e8b57"), Qt::CaseInsensitive));
+}
+
+void TestAverraButton::shouldRefreshStyleAfterStyleProfileChanges()
+{
+    AverraButton button;
+    button.setAccent(true);
+
+    AverraThemeManager::instance()->applyTheme(AverraThemeManager::OceanTheme);
+    AverraThemeManager::instance()->resetStyleProfile();
+    const QString win11Style = button.styleSheet();
+
+    AverraStyleProfile compactProfile = AverraStyleProfile::createDefaultProfile();
+    compactProfile.setControlRadius(6);
+    compactProfile.setButtonPaddingVertical(7);
+    compactProfile.setButtonPaddingHorizontal(14);
+    compactProfile.setTitleFontSize(15);
+    AverraThemeManager::instance()->setStyleProfile(compactProfile);
+    const QString customStyle = button.styleSheet();
+
+    QVERIFY(win11Style != customStyle);
+    QVERIFY(win11Style.contains(QStringLiteral("border-radius: 12px")));
+    QVERIFY(customStyle.contains(QStringLiteral("border-radius: 6px")));
 }
 
 void TestAverraButton::shouldUseThemeStateColorsInStyleSheet()

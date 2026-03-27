@@ -207,7 +207,6 @@ void AverraDataTable::initialize()
 
     m_searchBar->setPlaceholderText(QStringLiteral("搜索当前表格"));
     m_searchBar->setButtonText(QStringLiteral("筛选"));
-    m_refreshButton->setStyleSheet(QStringLiteral("min-height: 34px;"));
 
     m_toolbar->addTrailingWidget(m_searchBar);
     m_toolbar->addTrailingWidget(m_refreshButton);
@@ -341,4 +340,3 @@ void AverraDataTable::rebuildActionCells()
     m_tableView->setColumnWidth(actionColumn, kActionColumnWidth);
     Q_UNUSED(palette)
 }
-

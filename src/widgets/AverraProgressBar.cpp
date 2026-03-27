@@ -99,7 +99,8 @@ void AverraProgressBar::setShowText(bool showText)
 
 QSize AverraProgressBar::sizeHint() const
 {
-    return QSize(320, 30);
+    const AverraStyleProfile styleProfile = AverraThemeManager::instance()->styleProfile();
+    return QSize(320, qMax(28, styleProfile.controlRadius() * 2 + 6));
 }
 
 void AverraProgressBar::paintEvent(QPaintEvent *event)
@@ -107,6 +108,7 @@ void AverraProgressBar::paintEvent(QPaintEvent *event)
     Q_UNUSED(event)
 
     const AverraThemePalette palette = AverraThemeManager::instance()->palette();
+    const AverraStyleProfile styleProfile = AverraThemeManager::instance()->styleProfile();
 
     QPainter painter(this);
     painter.setRenderHint(QPainter::Antialiasing, true);
@@ -114,16 +116,18 @@ void AverraProgressBar::paintEvent(QPaintEvent *event)
     const QRectF trackRect(0.0, 0.0, width(), height());
     painter.setPen(Qt::NoPen);
     painter.setBrush(palette.surfaceColor());
-    painter.drawRoundedRect(trackRect, 10.0, 10.0);
+    painter.drawRoundedRect(trackRect, styleProfile.controlRadius(), styleProfile.controlRadius());
 
     QRectF fillRect = trackRect.adjusted(0.0, 0.0, 0.0, 0.0);
     fillRect.setWidth(trackRect.width() * progressRatio());
     painter.setBrush(palette.accentColor());
-    painter.drawRoundedRect(fillRect, 10.0, 10.0);
+    painter.drawRoundedRect(fillRect, styleProfile.controlRadius(), styleProfile.controlRadius());
 
     painter.setPen(QPen(palette.borderColor(), 1.0));
     painter.setBrush(Qt::NoBrush);
-    painter.drawRoundedRect(trackRect.adjusted(0.5, 0.5, -0.5, -0.5), 10.0, 10.0);
+    painter.drawRoundedRect(trackRect.adjusted(0.5, 0.5, -0.5, -0.5),
+                            styleProfile.controlRadius(),
+                            styleProfile.controlRadius());
 
     if (m_showText) {
         const int percent = static_cast<int>(progressRatio() * 100.0 + 0.5);
@@ -140,7 +144,7 @@ void AverraProgressBar::initialize()
     m_showText = true;
 
     setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
-    setMinimumHeight(30);
+    setMinimumHeight(sizeHint().height());
 
     connect(AverraThemeManager::instance(),
             &AverraThemeManager::paletteChanged,
@@ -150,6 +154,7 @@ void AverraProgressBar::initialize()
 
 void AverraProgressBar::handleThemeChanged()
 {
+    setMinimumHeight(sizeHint().height());
     update();
 }
 
@@ -161,4 +166,3 @@ qreal AverraProgressBar::progressRatio() const
 
     return static_cast<qreal>(m_value - m_minimum) / static_cast<qreal>(m_maximum - m_minimum);
 }
-

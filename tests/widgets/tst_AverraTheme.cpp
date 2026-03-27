@@ -1,3 +1,4 @@
+#include <Averra/AverraThemeManager.h>
 #include <Averra/AverraTheme.h>
 
 #include <QtTest>
@@ -10,6 +11,7 @@ private slots:
     void shouldProvideDefaultStateColors();
     void shouldAllowOverridingStateColors();
     void shouldDeriveStateColorsWhenUnset();
+    void shouldProvideDifferentThemePalettes();
 };
 
 void TestAverraTheme::shouldProvideDefaultStateColors()
@@ -56,6 +58,22 @@ void TestAverraTheme::shouldDeriveStateColorsWhenUnset()
     QVERIFY(palette.accentHoverColor().isValid());
     QVERIFY(palette.accentPressedColor().isValid());
     QVERIFY(palette.accentDisabledColor().isValid());
+}
+
+void TestAverraTheme::shouldProvideDifferentThemePalettes()
+{
+    const AverraThemePalette oceanPalette =
+        AverraThemeManager::createPalette(AverraThemeManager::OceanTheme);
+    const AverraThemePalette sunsetPalette =
+        AverraThemeManager::createPalette(AverraThemeManager::SunsetTheme);
+    const AverraThemePalette forestPalette =
+        AverraThemeManager::createPalette(AverraThemeManager::ForestTheme);
+
+    QCOMPARE(oceanPalette.accentColor(), QColor(QStringLiteral("#2E6BE6")));
+    QCOMPARE(sunsetPalette.accentColor(), QColor(QStringLiteral("#D97706")));
+    QCOMPARE(forestPalette.accentColor(), QColor(QStringLiteral("#2E8B57")));
+    QCOMPARE(oceanPalette.surfaceColor(), QColor(QStringLiteral("#F7F8FA")));
+    QVERIFY(oceanPalette.accentColor() != sunsetPalette.accentColor());
 }
 
 QObject *createTestAverraTheme()

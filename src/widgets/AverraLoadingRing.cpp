@@ -68,7 +68,9 @@ void AverraLoadingRing::stop()
 
 QSize AverraLoadingRing::sizeHint() const
 {
-    return QSize(m_diameter, m_diameter);
+    const AverraStyleProfile styleProfile = AverraThemeManager::instance()->styleProfile();
+    return QSize(qMax(m_diameter, styleProfile.pageTitleFontSize() + 6),
+                 qMax(m_diameter, styleProfile.pageTitleFontSize() + 6));
 }
 
 void AverraLoadingRing::paintEvent(QPaintEvent *event)
@@ -123,6 +125,6 @@ void AverraLoadingRing::advanceFrame()
 
 void AverraLoadingRing::handleThemeChanged()
 {
+    setFixedSize(sizeHint());
     update();
 }
-

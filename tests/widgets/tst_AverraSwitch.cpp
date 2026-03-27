@@ -15,6 +15,7 @@ private slots:
     void shouldEmitToggledWhenCheckedChanges();
     void shouldToggleWhenClicked();
     void shouldProvideDesktopSizedHint();
+    void shouldAdaptSizeHintForTrafficLightLayout();
 
 private:
     AverraThemePalette m_defaultPalette;
@@ -24,11 +25,15 @@ void TestAverraSwitch::init()
 {
     m_defaultPalette = AverraThemePalette::createLightPalette();
     AverraThemeManager::instance()->setPalette(m_defaultPalette);
+    AverraThemeManager::instance()->applyTheme(AverraThemeManager::OceanTheme);
+    AverraThemeManager::instance()->resetStyleProfile();
 }
 
 void TestAverraSwitch::cleanup()
 {
     AverraThemeManager::instance()->setPalette(m_defaultPalette);
+    AverraThemeManager::instance()->applyTheme(AverraThemeManager::OceanTheme);
+    AverraThemeManager::instance()->resetStyleProfile();
 }
 
 void TestAverraSwitch::shouldUseUncheckedStateByDefault()
@@ -67,6 +72,19 @@ void TestAverraSwitch::shouldProvideDesktopSizedHint()
 
     QVERIFY(switchButton.sizeHint().width() > switchButton.sizeHint().height());
     QCOMPARE(switchButton.sizeHint(), QSize(52, 30));
+}
+
+void TestAverraSwitch::shouldAdaptSizeHintForTrafficLightLayout()
+{
+    AverraStyleProfile compactProfile = AverraStyleProfile::createDefaultProfile();
+    compactProfile.setWindowControlsLayout(AverraStyleProfile::LeadingTrafficLights);
+    compactProfile.setControlRadius(6);
+    compactProfile.setButtonPaddingHorizontal(14);
+    compactProfile.setButtonPaddingVertical(7);
+    AverraThemeManager::instance()->setStyleProfile(compactProfile);
+    AverraSwitch switchButton;
+
+    QCOMPARE(switchButton.sizeHint(), QSize(46, 26));
 }
 
 QObject *createTestAverraSwitch()

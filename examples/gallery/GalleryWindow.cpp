@@ -265,6 +265,8 @@ GalleryWindow::GalleryWindow(QWidget *parent)
 
     m_oceanButton = nullptr;
     m_forestButton = nullptr;
+    m_sunsetButton = nullptr;
+    m_orchidButton = nullptr;
     m_categorySearchBar = nullptr;
     m_categoryHintLabel = nullptr;
     m_categoryNavigation = nullptr;
@@ -282,14 +284,24 @@ GalleryWindow::~GalleryWindow()
 {
 }
 
-void GalleryWindow::applyOceanAccent()
+void GalleryWindow::applyOceanTheme()
 {
-    AverraThemeManager::instance()->setAccentColor(QColor(QStringLiteral("#2E6BE6")));
+    AverraThemeManager::instance()->setThemePreset(AverraThemeManager::OceanTheme);
 }
 
-void GalleryWindow::applyForestAccent()
+void GalleryWindow::applyForestTheme()
 {
-    AverraThemeManager::instance()->setAccentColor(QColor(QStringLiteral("#2E8B57")));
+    AverraThemeManager::instance()->setThemePreset(AverraThemeManager::ForestTheme);
+}
+
+void GalleryWindow::applySunsetTheme()
+{
+    AverraThemeManager::instance()->setThemePreset(AverraThemeManager::SunsetTheme);
+}
+
+void GalleryWindow::applyOrchidTheme()
+{
+    AverraThemeManager::instance()->setThemePreset(AverraThemeManager::OrchidTheme);
 }
 
 void GalleryWindow::switchCategory(int index)
@@ -1817,7 +1829,7 @@ QFrame *GalleryWindow::createSidebarFrame()
     hintLayout->addWidget(createGuideLabel(QStringLiteral("3. 最后再把 live demo 当成落地参考。")));
 
     AverraSectionHeader *themeHeader = new AverraSectionHeader(QStringLiteral("主题切换"));
-    themeHeader->setSubtitle(QStringLiteral("快速查看不同强调色下的展示效果"));
+    themeHeader->setSubtitle(QStringLiteral("主题负责颜色气质；样式结构默认使用桌面参数，并可通过 StyleProfile JSON 自定义。"));
     themeHeader->setMetaText(QStringLiteral("Theme"));
 
     AverraSectionHeader *searchHeader = new AverraSectionHeader(QStringLiteral("按任务搜索"));
@@ -1832,8 +1844,24 @@ QFrame *GalleryWindow::createSidebarFrame()
     m_categoryHintLabel->setWordWrap(true);
     m_categoryHintLabel->setStyleSheet(QStringLiteral("font-size: 13px; color: #5B6472; line-height: 1.45;"));
 
-    m_oceanButton = new QPushButton(QStringLiteral("海洋蓝强调色"));
-    m_forestButton = new QPushButton(QStringLiteral("森林绿强调色"));
+    m_oceanButton = new AverraButton(QStringLiteral("Ocean 蓝"));
+    m_forestButton = new AverraButton(QStringLiteral("Forest 绿"));
+    m_sunsetButton = new AverraButton(QStringLiteral("Sunset 橙"));
+    m_orchidButton = new AverraButton(QStringLiteral("Orchid 紫"));
+
+    QWidget *themeButtonRow = new QWidget;
+    QHBoxLayout *themeButtonLayout = new QHBoxLayout(themeButtonRow);
+    themeButtonLayout->setContentsMargins(0, 0, 0, 0);
+    themeButtonLayout->setSpacing(8);
+    themeButtonLayout->addWidget(m_oceanButton);
+    themeButtonLayout->addWidget(m_forestButton);
+
+    QWidget *themeButtonRow2 = new QWidget;
+    QHBoxLayout *themeButtonLayout2 = new QHBoxLayout(themeButtonRow2);
+    themeButtonLayout2->setContentsMargins(0, 0, 0, 0);
+    themeButtonLayout2->setSpacing(8);
+    themeButtonLayout2->addWidget(m_sunsetButton);
+    themeButtonLayout2->addWidget(m_orchidButton);
 
     m_categoryNavigation = new AverraNavigationPanel(QStringLiteral("组件分类"));
 
@@ -1844,13 +1872,15 @@ QFrame *GalleryWindow::createSidebarFrame()
     layout->addWidget(m_categorySearchBar);
     layout->addWidget(m_categoryHintLabel);
     layout->addWidget(themeHeader);
-    layout->addWidget(m_oceanButton);
-    layout->addWidget(m_forestButton);
+    layout->addWidget(themeButtonRow);
+    layout->addWidget(themeButtonRow2);
     layout->addWidget(m_categoryNavigation);
     layout->addStretch(1);
 
-    connect(m_oceanButton, &QPushButton::clicked, this, &GalleryWindow::applyOceanAccent);
-    connect(m_forestButton, &QPushButton::clicked, this, &GalleryWindow::applyForestAccent);
+    connect(m_oceanButton, &QPushButton::clicked, this, &GalleryWindow::applyOceanTheme);
+    connect(m_forestButton, &QPushButton::clicked, this, &GalleryWindow::applyForestTheme);
+    connect(m_sunsetButton, &QPushButton::clicked, this, &GalleryWindow::applySunsetTheme);
+    connect(m_orchidButton, &QPushButton::clicked, this, &GalleryWindow::applyOrchidTheme);
     connect(m_categorySearchBar,
             &AverraSearchBar::textChanged,
             this,

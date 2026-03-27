@@ -1,0 +1,67 @@
+name: Release Packages
+
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  package-and-release:
+    runs-on: ubuntu-22.04
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            build-essential \
+            cmake \
+            ninja-build \
+            perl \
+            unzip \
+            zip \
+            libgl1-mesa-dev
+
+      - name: Install Qt 5.14.2
+        uses: jurplel/install-qt-action@v4
+        with:
+          version: 5.14.2
+          host: linux
+          target: desktop
+          arch: gcc_64
+          modules: qtbase
+          cache: true
+
+      - name: Package release artifacts
+        run: bash ./scripts/package_release.sh --dist-dir "${GITHUB_WORKSPACE}/dist"
+
+      - name: Upload workflow artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: averra-widgets-release-artifacts
+          path: |
+            dist/*.tar.gz
+            dist/*.zip
+            dist/SHA256SUMS.txt
+            dist/cpack/*.tar.gz
+            dist/cpack/*.zip
+          if-no-files-found: error
+
+      - name: Publish GitHub Release
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v2
+        with:
+          generate_release_notes: true
+          files: |
+            dist/*.tar.gz
+            dist/*.zip
+            dist/SHA256SUMS.txt
+            dist/cpack/*.tar.gz
+            dist/cpack/*.zip

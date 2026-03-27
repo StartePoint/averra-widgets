@@ -20,6 +20,7 @@ private slots:
     void shouldAllowAddingContentWidgets();
     void shouldToggleOpenedState();
     void shouldRefreshCloseButtonStyleAfterThemeChange();
+    void shouldRefreshWindowControlsForLeadingTrafficLightsLayout();
 
 private:
     AverraThemePalette m_defaultPalette;
@@ -29,11 +30,14 @@ void TestAverraDock::init()
 {
     m_defaultPalette = AverraThemePalette::createLightPalette();
     AverraThemeManager::instance()->setPalette(m_defaultPalette);
+    AverraThemeManager::instance()->applyTheme(AverraThemeManager::OceanTheme);
+    AverraThemeManager::instance()->resetStyleProfile();
 }
 
 void TestAverraDock::cleanup()
 {
     AverraThemeManager::instance()->setPalette(m_defaultPalette);
+    AverraThemeManager::instance()->resetStyleProfile();
 }
 
 void TestAverraDock::shouldStoreTitleAndDescription()
@@ -68,27 +72,51 @@ void TestAverraDock::shouldToggleOpenedState()
 
     dock->setOpened(false);
     QCOMPARE(dock->opened(), false);
-    QVERIFY(dock->isHidden());
+    QTRY_VERIFY(dock->isHidden());
 
     dock->setOpened(true);
     QCOMPARE(dock->opened(), true);
-    QVERIFY(dock->isVisible());
+    QTRY_VERIFY(dock->isVisible());
 }
 
 void TestAverraDock::shouldRefreshCloseButtonStyleAfterThemeChange()
 {
     AverraDock dock;
-    QToolButton *closeButton = dock.findChild<QToolButton *>(QStringLiteral("AverraDockCloseButton"));
+    QToolButton *minimizeButton = dock.findChild<QToolButton *>(QStringLiteral("AverraDockMinimizeButton"));
 
-    QVERIFY(closeButton != nullptr);
+    QVERIFY(minimizeButton != nullptr);
 
     AverraThemePalette palette = m_defaultPalette;
     palette.setSurfaceHoverColor(QColor(QStringLiteral("#F4F7FB")));
     palette.setSurfacePressedColor(QColor(QStringLiteral("#E7EDF6")));
     AverraThemeManager::instance()->setPalette(palette);
 
-    QVERIFY(closeButton->styleSheet().contains(QStringLiteral("#f4f7fb"), Qt::CaseInsensitive));
-    QVERIFY(closeButton->styleSheet().contains(QStringLiteral("#e7edf6"), Qt::CaseInsensitive));
+    QVERIFY(minimizeButton->styleSheet().contains(QStringLiteral("#f4f7fb"), Qt::CaseInsensitive));
+    QVERIFY(minimizeButton->styleSheet().contains(QStringLiteral("#e7edf6"), Qt::CaseInsensitive));
+}
+
+void TestAverraDock::shouldRefreshWindowControlsForLeadingTrafficLightsLayout()
+{
+    AverraDock dock;
+    QToolButton *closeButton = dock.findChild<QToolButton *>(QStringLiteral("AverraDockCloseButton"));
+    QToolButton *maximizeButton = dock.findChild<QToolButton *>(QStringLiteral("AverraDockMaximizeButton"));
+
+    QVERIFY(closeButton != nullptr);
+    QVERIFY(maximizeButton != nullptr);
+    QCOMPARE(closeButton->text(), QStringLiteral("×"));
+
+    AverraStyleProfile customProfile = AverraStyleProfile::createDefaultProfile();
+    customProfile.setWindowControlsLayout(AverraStyleProfile::LeadingTrafficLights);
+    customProfile.setTitleTextCentered(true);
+    customProfile.setWindowControlButtonWidth(10);
+    customProfile.setWindowControlButtonHeight(10);
+    customProfile.setTrafficLightDiameter(10);
+    customProfile.setEnableTitleBarDrag(false);
+    customProfile.setEnableTitleBarDoubleClickZoom(false);
+    AverraThemeManager::instance()->setStyleProfile(customProfile);
+
+    QCOMPARE(closeButton->text(), QString());
+    QCOMPARE(maximizeButton->text(), QString());
 }
 
 QObject *createTestAverraDock()

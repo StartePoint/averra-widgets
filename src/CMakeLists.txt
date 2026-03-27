@@ -9,6 +9,7 @@ set(AVERRA_PUBLIC_HEADERS
     ${CMAKE_CURRENT_SOURCE_DIR}/../include/Averra/AverraGlobal.h
     ${CMAKE_CURRENT_SOURCE_DIR}/../include/Averra/AverraVersion.h
     ${CMAKE_CURRENT_SOURCE_DIR}/../include/Averra/AverraTheme.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/../include/Averra/AverraStyleProfile.h
     ${CMAKE_CURRENT_SOURCE_DIR}/../include/Averra/AverraThemeManager.h
     ${CMAKE_CURRENT_SOURCE_DIR}/../include/Averra/AverraFieldDefinition.h
     ${CMAKE_CURRENT_SOURCE_DIR}/../include/Averra/AverraValidationResult.h
@@ -64,6 +65,7 @@ set(AVERRA_PUBLIC_HEADERS
 
 set(AVERRA_PRIVATE_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/core/AverraTheme.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/core/AverraStyleProfile.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/core/AverraThemeManager.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/core/AverraFieldDefinition.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/core/AverraValidationResult.cpp
@@ -190,5 +192,6 @@ install(FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/../docs/SCENARIO_GUIDE.md
     ${CMAKE_CURRENT_SOURCE_DIR}/../docs/ROADMAP.md
     ${CMAKE_CURRENT_SOURCE_DIR}/../docs/RELEASE.md
+    ${CMAKE_CURRENT_SOURCE_DIR}/../docs/style-profile.example.json
     DESTINATION ${CMAKE_INSTALL_DOCDIR}
 )

@@ -722,71 +722,80 @@ void AverraInspectorPanel::initialize()
 void AverraInspectorPanel::refreshStyle()
 {
     const AverraThemePalette palette = AverraThemeManager::instance()->palette();
+    const AverraStyleProfile styleProfile = AverraThemeManager::instance()->styleProfile();
 
     m_rootFrame->setStyleSheet(
         QStringLiteral(
             "QFrame#AverraInspectorPanelRoot {"
             "background-color: %1;"
             "border: 1px solid %2;"
-            "border-radius: 18px;"
+            "border-radius: %3px;"
             "}")
-            .arg(palette.surfaceColor().name(), palette.borderColor().name()));
+            .arg(palette.surfaceColor().name(),
+                 palette.borderColor().name(),
+                 QString::number(styleProfile.panelRadius())));
     m_statusBarFrame->setStyleSheet(
         QStringLiteral(
             "QFrame#AverraInspectorPanelStatusBar {"
             "background-color: %1;"
             "border: 1px solid %2;"
-            "border-radius: 12px;"
+            "border-radius: %3px;"
             "}")
-            .arg(palette.surfaceRaisedColor().name(), palette.borderColor().name()));
+            .arg(palette.surfaceRaisedColor().name(),
+                 palette.borderColor().name(),
+                 QString::number(styleProfile.mediumRadius())));
     m_titleLabel->setStyleSheet(
         QStringLiteral(
             "QLabel#AverraInspectorPanelTitle {"
             "color: %1;"
-            "font-size: 18px;"
+            "font-size: %2px;"
             "font-weight: 700;"
             "background: transparent;"
             "}")
-            .arg(palette.textPrimaryColor().name()));
+            .arg(palette.textPrimaryColor().name(),
+                 QString::number(styleProfile.pageTitleFontSize())));
     m_subtitleLabel->setStyleSheet(
         QStringLiteral(
             "QLabel#AverraInspectorPanelSubtitle {"
             "color: %1;"
-            "font-size: 13px;"
+            "font-size: %2px;"
             "font-weight: 500;"
             "background: transparent;"
             "}")
-            .arg(palette.textSecondaryColor().name()));
+            .arg(palette.textSecondaryColor().name(),
+                 QString::number(styleProfile.bodyFontSize())));
     m_statusLabel->setStyleSheet(
         QStringLiteral(
             "QLabel#AverraInspectorPanelStatus {"
             "color: %1;"
             "background: transparent;"
             "padding: 0px;"
-            "font-size: 12px;"
+            "font-size: %2px;"
             "font-weight: 700;"
             "}")
-            .arg(palette.accentColor().name()));
+            .arg(palette.accentColor().name(),
+                 QString::number(styleProfile.smallFontSize())));
     m_submitResultLabel->setStyleSheet(
         QStringLiteral(
             "QLabel {"
             "color: %1;"
             "background: transparent;"
-            "font-size: 12px;"
+            "font-size: %2px;"
             "font-weight: 600;"
             "}")
             .arg(m_submitState == SubmitFailed ? palette.errorColor().name()
                                                : (m_submitState == SubmitSucceeded ? palette.successColor().name()
-                                                                                  : palette.textSecondaryColor().name())));
+                                                                                  : palette.textSecondaryColor().name()),
+                 QString::number(styleProfile.smallFontSize())));
     m_submitButton->setStyleSheet(
         QStringLiteral(
             "QPushButton {"
             "background-color: %1;"
             "color: #FFFFFF;"
             "border: 1px solid %1;"
-            "border-radius: 10px;"
-            "padding: 8px 14px;"
-            "font-size: 12px;"
+            "border-radius: %4px;"
+            "padding: %5px %6px;"
+            "font-size: %7px;"
             "font-weight: 700;"
             "}"
             "QPushButton:disabled {"
@@ -796,21 +805,29 @@ void AverraInspectorPanel::refreshStyle()
             "}")
             .arg(palette.accentColor().name(),
                  palette.accentDisabledColor().name(),
-                 palette.surfaceRaisedColor().name()));
+                 palette.surfaceRaisedColor().name(),
+                 QString::number(styleProfile.controlRadius()),
+                 QString::number(styleProfile.compactPaddingVertical() + 1),
+                 QString::number(styleProfile.buttonPaddingHorizontal() - 4),
+                 QString::number(styleProfile.smallFontSize())));
     m_retryButton->setStyleSheet(
         QStringLiteral(
             "QPushButton {"
             "background-color: %1;"
             "color: %2;"
             "border: 1px solid %3;"
-            "border-radius: 10px;"
-            "padding: 8px 14px;"
-            "font-size: 12px;"
+            "border-radius: %4px;"
+            "padding: %5px %6px;"
+            "font-size: %7px;"
             "font-weight: 700;"
             "}")
             .arg(palette.surfaceRaisedColor().name(),
                  palette.textPrimaryColor().name(),
-                 palette.borderColor().name()));
+                 palette.borderColor().name(),
+                 QString::number(styleProfile.controlRadius()),
+                 QString::number(styleProfile.compactPaddingVertical() + 1),
+                 QString::number(styleProfile.buttonPaddingHorizontal() - 4),
+                 QString::number(styleProfile.smallFontSize())));
 }
 
 void AverraInspectorPanel::syncValidationFromFormModel()

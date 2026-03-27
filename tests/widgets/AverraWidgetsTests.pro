@@ -61,6 +61,7 @@ SOURCES += \
     $$PWD/tst_AverraSkeleton.cpp \
     $$PWD/tst_AverraSlider.cpp \
     $$PWD/tst_AverraStatisticCard.cpp \
+    $$PWD/tst_AverraStyleProfile.cpp \
     $$PWD/tst_AverraSwitch.cpp \
     $$PWD/tst_AverraTabs.cpp \
     $$PWD/tst_AverraTag.cpp \

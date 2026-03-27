@@ -1,6 +1,6 @@
 TEMPLATE = lib
 TARGET = AverraWidgets
-VERSION = 1.0.0
+VERSION = 1.0.1
 
 AVERRA_BUILD_ROOT = $$clean_path($$PWD/../build/qmake)
 AVERRA_LIB_OUTPUT_DIR = $$clean_path($$AVERRA_BUILD_ROOT/lib)
@@ -25,6 +25,7 @@ HEADERS += \
     $$PWD/../include/Averra/AverraGlobal.h \
     $$PWD/../include/Averra/AverraVersion.h \
     $$PWD/../include/Averra/AverraTheme.h \
+    $$PWD/../include/Averra/AverraStyleProfile.h \
     $$PWD/../include/Averra/AverraThemeManager.h \
     $$PWD/../include/Averra/AverraFieldDefinition.h \
     $$PWD/../include/Averra/AverraValidationResult.h \
@@ -80,6 +81,7 @@ HEADERS += \
 
 SOURCES += \
     $$PWD/core/AverraTheme.cpp \
+    $$PWD/core/AverraStyleProfile.cpp \
     $$PWD/core/AverraThemeManager.cpp \
     $$PWD/core/AverraFieldDefinition.cpp \
     $$PWD/core/AverraValidationResult.cpp \

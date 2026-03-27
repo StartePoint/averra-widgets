@@ -6,7 +6,10 @@
 #include <QDockWidget>
 
 class QFrame;
+class QGraphicsOpacityEffect;
+class QHBoxLayout;
 class QLabel;
+class QParallelAnimationGroup;
 class QToolButton;
 class QVBoxLayout;
 
@@ -45,18 +48,31 @@ private slots:
     void syncOpenedState(bool visible);
 
 private:
+    void updateWindowControlLayout();
+    void updateWindowControlStyle();
+    void startShowAnimation();
+    void startHideAnimation();
     void updateTextVisibility();
 
     QString m_title;
     QString m_description;
     bool m_opened;
+    bool m_allowImmediateHide;
     QFrame *m_titleBarFrame;
     QLabel *m_titleLabel;
     QLabel *m_descriptionLabel;
+    QWidget *m_windowControlsWidget;
+    QToolButton *m_minimizeButton;
+    QToolButton *m_maximizeButton;
     QToolButton *m_closeButton;
+    QHBoxLayout *m_titleBarLayout;
+    QHBoxLayout *m_windowControlsLayout;
     QFrame *m_rootFrame;
     QWidget *m_contentHost;
     QVBoxLayout *m_contentLayout;
+    QGraphicsOpacityEffect *m_opacityEffect;
+    QParallelAnimationGroup *m_showAnimation;
+    QParallelAnimationGroup *m_hideAnimation;
 };
 
 #endif // AVERRA_DOCK_H

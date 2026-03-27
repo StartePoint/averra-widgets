@@ -1,12 +1,156 @@
 #include "AverraStyleHelper.h"
 
+#include <Averra/AverraThemeManager.h>
+
 #include <QString>
+#include <QtGlobal>
 
 namespace
 {
+struct StyleMetrics
+{
+    int smallRadius;
+    int controlRadius;
+    int mediumRadius;
+    int largeRadius;
+    int cardRadius;
+    int panelRadius;
+    int pageRadius;
+    int smallFontSize;
+    int bodyFontSize;
+    int titleFontSize;
+    int pageTitleFontSize;
+    int displayFontSize;
+    int buttonPaddingVertical;
+    int buttonPaddingHorizontal;
+    int compactPaddingVertical;
+    int compactPaddingHorizontal;
+};
+
+StyleMetrics styleMetrics()
+{
+    StyleMetrics metrics;
+    AverraStyleProfile profile = AverraStyleProfile::createDefaultProfile();
+    AverraThemeManager *manager = AverraThemeManager::instance();
+
+    if (manager != nullptr) {
+        profile = manager->styleProfile();
+    }
+
+    metrics.smallRadius = profile.smallRadius();
+    metrics.controlRadius = profile.controlRadius();
+    metrics.mediumRadius = profile.mediumRadius();
+    metrics.largeRadius = profile.largeRadius();
+    metrics.cardRadius = profile.cardRadius();
+    metrics.panelRadius = profile.panelRadius();
+    metrics.pageRadius = profile.pageRadius();
+    metrics.smallFontSize = profile.smallFontSize();
+    metrics.bodyFontSize = profile.bodyFontSize();
+    metrics.titleFontSize = profile.titleFontSize();
+    metrics.pageTitleFontSize = profile.pageTitleFontSize();
+    metrics.displayFontSize = profile.displayFontSize();
+    metrics.buttonPaddingVertical = profile.buttonPaddingVertical();
+    metrics.buttonPaddingHorizontal = profile.buttonPaddingHorizontal();
+    metrics.compactPaddingVertical = profile.compactPaddingVertical();
+    metrics.compactPaddingHorizontal = profile.compactPaddingHorizontal();
+    return metrics;
+}
+
 QString colorToCss(const QColor &color)
 {
     return color.name();
+}
+
+QString numberCss(int value)
+{
+    return QString::number(value);
+}
+
+int regularControlHeight(const StyleMetrics &metrics)
+{
+    return qMax(metrics.bodyFontSize + (metrics.buttonPaddingVertical * 2) + 7,
+                (metrics.controlRadius * 2) + 14);
+}
+
+int capsuleRadius(const StyleMetrics &metrics)
+{
+    return qMax(metrics.controlRadius,
+                metrics.buttonPaddingVertical + metrics.compactPaddingHorizontal);
+}
+
+int compactInset(const StyleMetrics &metrics)
+{
+    return qMax(2, metrics.compactPaddingVertical - 3);
+}
+
+int compactInsetHorizontal(const StyleMetrics &metrics)
+{
+    return qMax(4, metrics.compactPaddingHorizontal - 2);
+}
+
+int searchInsetHorizontal(const StyleMetrics &metrics)
+{
+    return qMax(4, metrics.compactPaddingHorizontal - 6);
+}
+
+int comboDropDownWidth(const StyleMetrics &metrics)
+{
+    return qMax(24, metrics.buttonPaddingHorizontal + 10);
+}
+
+int dateDropDownWidth(const StyleMetrics &metrics)
+{
+    return qMax(24, metrics.buttonPaddingHorizontal + 8);
+}
+
+int spinButtonWidth(const StyleMetrics &metrics)
+{
+    return qMax(16, metrics.compactPaddingHorizontal + 8);
+}
+
+int regularArrowIconSize(const StyleMetrics &metrics)
+{
+    return qMax(10, metrics.smallFontSize);
+}
+
+int smallArrowIconSize(const StyleMetrics &metrics)
+{
+    return qMax(8, metrics.smallFontSize - 4);
+}
+
+int paginationMinWidth(const StyleMetrics &metrics)
+{
+    return qMax(28, regularControlHeight(metrics) - 6);
+}
+
+int menuItemHorizontalPadding(const StyleMetrics &metrics)
+{
+    return qMax(14, metrics.buttonPaddingHorizontal + 2);
+}
+
+int tableHeaderPadding(const StyleMetrics &metrics)
+{
+    return qMax(6, metrics.compactPaddingVertical + 1);
+}
+
+int badgeRightPadding(const StyleMetrics &metrics)
+{
+    return metrics.buttonPaddingHorizontal + 26;
+}
+
+int comboTrailingPadding(const StyleMetrics &metrics)
+{
+    return comboDropDownWidth(metrics) + 6;
+}
+
+int dateTrailingPadding(const StyleMetrics &metrics)
+{
+    return dateDropDownWidth(metrics) + 4;
+}
+
+int spinTrailingPadding(const StyleMetrics &metrics)
+{
+    return spinButtonWidth(metrics) + 10;
 }
 
 QPair<QColor, QColor> infoBarColors(const AverraThemePalette &palette, AverraStyleHelper::InfoBarType type)
@@ -46,6 +190,7 @@ QPair<QColor, QColor> tagColors(const AverraThemePalette &palette, AverraStyleHe
 
 QString AverraStyleHelper::buttonStyleSheet(const AverraThemePalette &palette, bool accent)
 {
+    const StyleMetrics metrics = styleMetrics();
     QString backgroundColor;
     QString borderColor;
     QString textColor;
@@ -83,9 +228,9 @@ QString AverraStyleHelper::buttonStyleSheet(const AverraThemePalette &palette, b
                "background-color: %1;"
                "color: %2;"
                "border: 1px solid %3;"
-               "border-radius: 10px;"
-               "padding: 10px 18px;"
-               "font-size: 14px;"
+               "border-radius: %10px;"
+               "padding: %11px %12px;"
+               "font-size: %13px;"
                "font-weight: 600;"
                "}"
                "QPushButton:hover {"
@@ -95,8 +240,8 @@ QString AverraStyleHelper::buttonStyleSheet(const AverraThemePalette &palette, b
                "QPushButton:pressed {"
                "background-color: %6;"
                "border-color: %4;"
-               "padding-top: 11px;"
-               "padding-bottom: 9px;"
+               "padding-top: %14px;"
+               "padding-bottom: %15px;"
                "}"
                "QPushButton:disabled {"
                "background-color: %7;"
@@ -111,11 +256,18 @@ QString AverraStyleHelper::buttonStyleSheet(const AverraThemePalette &palette, b
              pressedBackgroundColor,
              disabledBackgroundColor,
              disabledTextColor,
-             disabledBorderColor);
+             disabledBorderColor,
+             numberCss(metrics.controlRadius),
+             numberCss(metrics.buttonPaddingVertical),
+             numberCss(metrics.buttonPaddingHorizontal),
+             numberCss(metrics.titleFontSize - 2),
+             numberCss(metrics.buttonPaddingVertical + 1),
+             numberCss(metrics.buttonPaddingVertical - 1));
 }
 
 QString AverraStyleHelper::badgeButtonStyleSheet(const AverraThemePalette &palette, bool accent)
 {
+    const StyleMetrics metrics = styleMetrics();
     QString backgroundColor;
     QString borderColor;
     QString textColor;
@@ -144,9 +296,9 @@ QString AverraStyleHelper::badgeButtonStyleSheet(const AverraThemePalette &palet
                "background-color: %1;"
                "color: %2;"
                "border: 1px solid %3;"
-               "border-radius: 12px;"
-               "padding: 10px 44px 10px 18px;"
-               "font-size: 13px;"
+               "border-radius: %7px;"
+               "padding: %8px %13px %8px %9px;"
+               "font-size: %10px;"
                "font-weight: 700;"
                "}"
                "QPushButton:hover {"
@@ -155,19 +307,27 @@ QString AverraStyleHelper::badgeButtonStyleSheet(const AverraThemePalette &palet
                "}"
                "QPushButton:pressed {"
                "background-color: %6;"
-               "padding-top: 11px;"
-               "padding-bottom: 9px;"
+               "padding-top: %11px;"
+               "padding-bottom: %12px;"
                "}")
         .arg(backgroundColor,
              textColor,
              borderColor,
              hoverBackgroundColor,
              hoverBorderColor,
-             pressedBackgroundColor);
+             pressedBackgroundColor,
+             numberCss(metrics.mediumRadius),
+             numberCss(metrics.buttonPaddingVertical),
+             numberCss(metrics.buttonPaddingHorizontal),
+             numberCss(metrics.bodyFontSize),
+             numberCss(metrics.buttonPaddingVertical + 1),
+             numberCss(metrics.buttonPaddingVertical - 1),
+             numberCss(badgeRightPadding(metrics)));
 }
 
 QString AverraStyleHelper::badgeButtonBadgeStyleSheet(const AverraThemePalette &palette, bool accent)
 {
+    const StyleMetrics metrics = styleMetrics();
     QString backgroundColor;
     QString textColor;
 
@@ -183,16 +343,22 @@ QString AverraStyleHelper::badgeButtonBadgeStyleSheet(const AverraThemePalette &
                "QLabel#AverraBadgeButtonBadge {"
                "background-color: %1;"
                "color: %2;"
-               "border-radius: 999px;"
-               "padding: 3px 7px;"
-               "font-size: 11px;"
+               "border-radius: %3px;"
+               "padding: %4px %5px;"
+               "font-size: %6px;"
                "font-weight: 700;"
                "}")
-        .arg(backgroundColor, textColor);
+        .arg(backgroundColor,
+             textColor,
+             numberCss(capsuleRadius(metrics)),
+             numberCss(compactInset(metrics)),
+             numberCss(compactInsetHorizontal(metrics)),
+             numberCss(metrics.smallFontSize - 1));
 }
 
 QString AverraStyleHelper::filterChipStyleSheet(const AverraThemePalette &palette, bool selected)
 {
+    const StyleMetrics metrics = styleMetrics();
     QString backgroundColor;
     QString borderColor;
     QString textColor;
@@ -224,9 +390,9 @@ QString AverraStyleHelper::filterChipStyleSheet(const AverraThemePalette &palett
                "background-color: %1;"
                "color: %2;"
                "border: 1px solid %3;"
-               "border-radius: 999px;"
-               "padding: 8px 12px;"
-               "font-size: 12px;"
+               "border-radius: %13px;"
+               "padding: %8px %9px;"
+               "font-size: %10px;"
                "font-weight: 700;"
                "}"
                "QPushButton:hover {"
@@ -237,8 +403,8 @@ QString AverraStyleHelper::filterChipStyleSheet(const AverraThemePalette &palett
                "QPushButton:pressed {"
                "background-color: %7;"
                "border-color: %4;"
-               "padding-top: 9px;"
-               "padding-bottom: 7px;"
+               "padding-top: %11px;"
+               "padding-bottom: %12px;"
                "}")
         .arg(backgroundColor,
              textColor,
@@ -246,11 +412,18 @@ QString AverraStyleHelper::filterChipStyleSheet(const AverraThemePalette &palett
              hoverBackgroundColor,
              hoverBorderColor,
              hoverTextColor,
-             pressedBackgroundColor);
+             pressedBackgroundColor,
+             numberCss(metrics.compactPaddingVertical + 1),
+             numberCss(metrics.compactPaddingHorizontal + 2),
+             numberCss(metrics.smallFontSize),
+             numberCss(metrics.compactPaddingVertical + 2),
+             numberCss(metrics.compactPaddingVertical),
+             numberCss(capsuleRadius(metrics)));
 }
 
 QString AverraStyleHelper::lineEditStyleSheet(const AverraThemePalette &palette, bool accentFrame)
 {
+    const StyleMetrics metrics = styleMetrics();
     QString borderColor;
 
     if (accentFrame) {
@@ -264,8 +437,8 @@ QString AverraStyleHelper::lineEditStyleSheet(const AverraThemePalette &palette,
                "background-color: %1;"
                "color: %2;"
                "border: 1px solid %3;"
-               "border-radius: 10px;"
-               "padding: 0 14px;"
+               "border-radius: %9px;"
+               "padding: 0 %10px;"
                "selection-background-color: %4;"
                "selection-color: #FFFFFF;"
                "}"
@@ -289,11 +462,14 @@ QString AverraStyleHelper::lineEditStyleSheet(const AverraThemePalette &palette,
              colorToCss(palette.borderHoverColor()),
              colorToCss(palette.accentColor()),
              colorToCss(palette.surfaceDisabledColor()),
-             colorToCss(palette.textDisabledColor()));
+             colorToCss(palette.textDisabledColor()),
+             numberCss(metrics.controlRadius),
+             numberCss(metrics.buttonPaddingHorizontal - 4));
 }
 
 QString AverraStyleHelper::textAreaStyleSheet(const AverraThemePalette &palette, bool accentFrame)
 {
+    const StyleMetrics metrics = styleMetrics();
     QString borderColor;
 
     if (accentFrame) {
@@ -307,11 +483,11 @@ QString AverraStyleHelper::textAreaStyleSheet(const AverraThemePalette &palette,
                "background-color: %1;"
                "color: %2;"
                "border: 1px solid %3;"
-               "border-radius: 12px;"
-               "padding: 10px 12px;"
+               "border-radius: %9px;"
+               "padding: %10px %11px;"
                "selection-background-color: %4;"
                "selection-color: #FFFFFF;"
-               "font-size: 13px;"
+               "font-size: %12px;"
                "}"
                "QTextEdit:hover {"
                "background-color: %4;"
@@ -333,11 +509,16 @@ QString AverraStyleHelper::textAreaStyleSheet(const AverraThemePalette &palette,
              colorToCss(palette.borderHoverColor()),
              colorToCss(palette.accentColor()),
              colorToCss(palette.surfaceDisabledColor()),
-             colorToCss(palette.textDisabledColor()));
+             colorToCss(palette.textDisabledColor()),
+             numberCss(metrics.mediumRadius),
+             numberCss(metrics.buttonPaddingVertical),
+             numberCss(metrics.compactPaddingHorizontal + 2),
+             numberCss(metrics.bodyFontSize));
 }
 
 QString AverraStyleHelper::comboBoxStyleSheet(const AverraThemePalette &palette, bool accentFrame)
 {
+    const StyleMetrics metrics = styleMetrics();
     QString borderColor;
 
     if (accentFrame) {
@@ -351,10 +532,10 @@ QString AverraStyleHelper::comboBoxStyleSheet(const AverraThemePalette &palette,
                "background-color: %1;"
                "color: %2;"
                "border: 1px solid %3;"
-               "border-radius: 10px;"
-               "padding: 0 34px 0 12px;"
-               "font-size: 13px;"
-               "min-height: 40px;"
+               "border-radius: %10px;"
+               "padding: 0 %14px 0 %11px;"
+               "font-size: %12px;"
+               "min-height: %15px;"
                "}"
                "QComboBox:hover {"
                "background-color: %4;"
@@ -367,17 +548,18 @@ QString AverraStyleHelper::comboBoxStyleSheet(const AverraThemePalette &palette,
                "}"
                "QComboBox::drop-down {"
                "border: none;"
-               "width: 28px;"
+               "width: %16px;"
                "}"
                "QComboBox::down-arrow {"
                "image: url(:/Averra/icons/chevron-down.svg);"
-               "width: 12px;"
-               "height: 12px;"
+               "width: %17px;"
+               "height: %17px;"
                "}"
                "QComboBox QAbstractItemView {"
                "background-color: %8;"
                "color: %2;"
                "border: 1px solid %3;"
+               "border-radius: %13px;"
                "selection-background-color: %9;"
                "selection-color: #FFFFFF;"
                "}")
@@ -389,11 +571,20 @@ QString AverraStyleHelper::comboBoxStyleSheet(const AverraThemePalette &palette,
              colorToCss(palette.surfaceDisabledColor()),
              colorToCss(palette.textDisabledColor()),
              colorToCss(palette.surfaceRaisedColor()),
-             colorToCss(palette.accentColor()));
+             colorToCss(palette.accentColor()),
+             numberCss(metrics.controlRadius),
+             numberCss(metrics.compactPaddingHorizontal + 2),
+             numberCss(metrics.bodyFontSize),
+             numberCss(metrics.mediumRadius),
+             numberCss(comboTrailingPadding(metrics)),
+             numberCss(regularControlHeight(metrics)),
+             numberCss(comboDropDownWidth(metrics)),
+             numberCss(regularArrowIconSize(metrics)));
 }
 
 QString AverraStyleHelper::numberBoxStyleSheet(const AverraThemePalette &palette, bool accentFrame)
 {
+    const StyleMetrics metrics = styleMetrics();
     QString borderColor;
 
     if (accentFrame) {
@@ -407,10 +598,10 @@ QString AverraStyleHelper::numberBoxStyleSheet(const AverraThemePalette &palette
                "background-color: %1;"
                "color: %2;"
                "border: 1px solid %3;"
-               "border-radius: 10px;"
-               "padding: 0 28px 0 12px;"
-               "font-size: 13px;"
-               "min-height: 40px;"
+               "border-radius: %8px;"
+               "padding: 0 %11px 0 %9px;"
+               "font-size: %10px;"
+               "min-height: %12px;"
                "}"
                "QSpinBox:hover {"
                "background-color: %4;"
@@ -423,12 +614,12 @@ QString AverraStyleHelper::numberBoxStyleSheet(const AverraThemePalette &palette
                "}"
                "QSpinBox::up-button, QSpinBox::down-button {"
                "border: none;"
-               "width: 18px;"
+               "width: %13px;"
                "background: transparent;"
                "}"
                "QSpinBox::up-arrow, QSpinBox::down-arrow {"
-               "width: 8px;"
-               "height: 8px;"
+               "width: %14px;"
+               "height: %14px;"
                "}")
         .arg(colorToCss(palette.surfaceRaisedColor()),
              colorToCss(palette.textPrimaryColor()),
@@ -436,11 +627,19 @@ QString AverraStyleHelper::numberBoxStyleSheet(const AverraThemePalette &palette
              colorToCss(palette.surfaceHoverColor()),
              colorToCss(palette.borderHoverColor()),
              colorToCss(palette.surfaceDisabledColor()),
-             colorToCss(palette.textDisabledColor()));
+             colorToCss(palette.textDisabledColor()),
+             numberCss(metrics.controlRadius),
+             numberCss(metrics.compactPaddingHorizontal + 2),
+             numberCss(metrics.bodyFontSize),
+             numberCss(spinTrailingPadding(metrics)),
+             numberCss(regularControlHeight(metrics)),
+             numberCss(spinButtonWidth(metrics)),
+             numberCss(smallArrowIconSize(metrics)));
 }
 
 QString AverraStyleHelper::dateEditStyleSheet(const AverraThemePalette &palette, bool accentFrame)
 {
+    const StyleMetrics metrics = styleMetrics();
     QString borderColor;
 
     if (accentFrame) {
@@ -454,10 +653,10 @@ QString AverraStyleHelper::dateEditStyleSheet(const AverraThemePalette &palette,
                "background-color: %1;"
                "color: %2;"
                "border: 1px solid %3;"
-               "border-radius: 10px;"
-               "padding: 0 30px 0 12px;"
-               "font-size: 13px;"
-               "min-height: 40px;"
+               "border-radius: %8px;"
+               "padding: 0 %11px 0 %9px;"
+               "font-size: %10px;"
+               "min-height: %12px;"
                "}"
                "QDateEdit:hover {"
                "background-color: %4;"
@@ -470,12 +669,12 @@ QString AverraStyleHelper::dateEditStyleSheet(const AverraThemePalette &palette,
                "}"
                "QDateEdit::drop-down {"
                "border: none;"
-               "width: 26px;"
+               "width: %13px;"
                "}"
                "QDateEdit::down-arrow {"
                "image: url(:/Averra/icons/chevron-down.svg);"
-               "width: 12px;"
-               "height: 12px;"
+               "width: %14px;"
+               "height: %14px;"
                "}")
         .arg(colorToCss(palette.surfaceRaisedColor()),
              colorToCss(palette.textPrimaryColor()),
@@ -483,11 +682,19 @@ QString AverraStyleHelper::dateEditStyleSheet(const AverraThemePalette &palette,
              colorToCss(palette.surfaceHoverColor()),
              colorToCss(palette.borderHoverColor()),
              colorToCss(palette.surfaceDisabledColor()),
-             colorToCss(palette.textDisabledColor()));
+             colorToCss(palette.textDisabledColor()),
+             numberCss(metrics.controlRadius),
+             numberCss(metrics.compactPaddingHorizontal + 2),
+             numberCss(metrics.bodyFontSize),
+             numberCss(dateTrailingPadding(metrics)),
+             numberCss(regularControlHeight(metrics)),
+             numberCss(dateDropDownWidth(metrics)),
+             numberCss(regularArrowIconSize(metrics)));
 }
 
 QString AverraStyleHelper::calendarWidgetStyleSheet(const AverraThemePalette &palette, bool accentFrame)
 {
+    const StyleMetrics metrics = styleMetrics();
     QString accentColor;
 
     if (accentFrame) {
@@ -501,23 +708,23 @@ QString AverraStyleHelper::calendarWidgetStyleSheet(const AverraThemePalette &pa
                "background-color: %1;"
                "color: %2;"
                "border: 1px solid %3;"
-               "border-radius: 14px;"
+               "border-radius: %11px;"
                "}"
                "QCalendarWidget QWidget#qt_calendar_navigationbar {"
                "background-color: %4;"
                "border-bottom: 1px solid %3;"
-               "border-top-left-radius: 14px;"
-               "border-top-right-radius: 14px;"
+               "border-top-left-radius: %11px;"
+               "border-top-right-radius: %11px;"
                "}"
                "QCalendarWidget QToolButton {"
                "background-color: transparent;"
                "color: %2;"
                "border: none;"
-               "border-radius: 8px;"
-               "padding: 6px 10px;"
-               "font-size: 13px;"
+               "border-radius: %12px;"
+               "padding: %16px %17px;"
+               "font-size: %13px;"
                "font-weight: 700;"
-               "min-width: 28px;"
+               "min-width: %18px;"
                "}"
                "QCalendarWidget QToolButton:hover {"
                "background-color: %5;"
@@ -531,9 +738,9 @@ QString AverraStyleHelper::calendarWidgetStyleSheet(const AverraThemePalette &pa
                "background-color: %1;"
                "color: %2;"
                "border: 1px solid %3;"
-               "border-radius: 8px;"
-               "padding: 4px 8px;"
-               "min-width: 64px;"
+               "border-radius: %12px;"
+               "padding: %19px %20px;"
+               "min-width: %21px;"
                "selection-background-color: %8;"
                "selection-color: #FFFFFF;"
                "}"
@@ -541,11 +748,11 @@ QString AverraStyleHelper::calendarWidgetStyleSheet(const AverraThemePalette &pa
                "background-color: %1;"
                "color: %2;"
                "border: 1px solid %3;"
-               "padding: 6px;"
+               "padding: %22px;"
                "}"
                "QCalendarWidget QMenu::item {"
-               "padding: 6px 12px;"
-               "border-radius: 6px;"
+               "padding: %23px %24px;"
+               "border-radius: %14px;"
                "}"
                "QCalendarWidget QMenu::item:selected {"
                "background-color: %5;"
@@ -567,8 +774,8 @@ QString AverraStyleHelper::calendarWidgetStyleSheet(const AverraThemePalette &pa
                "gridline-color: %3;"
                "}"
                "QCalendarWidget QTableView::item {"
-               "border-radius: 8px;"
-               "padding: 4px;"
+               "border-radius: %12px;"
+               "padding: %19px;"
                "}"
                "QCalendarWidget QTableView::item:hover {"
                "background-color: %5;"
@@ -588,8 +795,8 @@ QString AverraStyleHelper::calendarWidgetStyleSheet(const AverraThemePalette &pa
                "background-color: transparent;"
                "color: %10;"
                "border: none;"
-               "padding: 6px 0;"
-               "font-size: 12px;"
+               "padding: %23px 0;"
+               "font-size: %15px;"
                "font-weight: 700;"
                "}")
         .arg(colorToCss(palette.surfaceRaisedColor()),
@@ -601,11 +808,25 @@ QString AverraStyleHelper::calendarWidgetStyleSheet(const AverraThemePalette &pa
              colorToCss(palette.surfacePressedColor()),
              accentColor,
              colorToCss(palette.textDisabledColor()),
-             colorToCss(palette.textSecondaryColor()));
+             colorToCss(palette.textSecondaryColor()),
+             numberCss(metrics.largeRadius),
+             numberCss(metrics.smallRadius),
+             numberCss(metrics.bodyFontSize),
+             numberCss(metrics.smallRadius - 1),
+             numberCss(metrics.smallFontSize),
+             numberCss(qMax(4, metrics.compactPaddingVertical - 1)),
+             numberCss(metrics.compactPaddingHorizontal),
+             numberCss(qMax(24, metrics.buttonPaddingHorizontal + 10)),
+             numberCss(compactInset(metrics)),
+             numberCss(compactInsetHorizontal(metrics)),
+             numberCss(qMax(56, regularControlHeight(metrics) + metrics.buttonPaddingHorizontal + 6)),
+             numberCss(qMax(4, metrics.compactPaddingVertical - 1)),
+             numberCss(menuItemHorizontalPadding(metrics)));
 }
 
 QString AverraStyleHelper::searchBarFrameStyleSheet(const AverraThemePalette &palette, bool accentFrame)
 {
+    const StyleMetrics metrics = styleMetrics();
     QString borderColor;
 
     if (accentFrame) {
@@ -618,7 +839,7 @@ QString AverraStyleHelper::searchBarFrameStyleSheet(const AverraThemePalette &pa
                "QFrame#AverraSearchBarRoot {"
                "background-color: %1;"
                "border: 1px solid %2;"
-               "border-radius: 12px;"
+               "border-radius: %5px;"
                "}"
                "QFrame#AverraSearchBarRoot:hover {"
                "background-color: %3;"
@@ -627,24 +848,29 @@ QString AverraStyleHelper::searchBarFrameStyleSheet(const AverraThemePalette &pa
         .arg(colorToCss(palette.surfaceRaisedColor()),
              borderColor,
              colorToCss(palette.surfaceHoverColor()),
-             colorToCss(palette.borderHoverColor()));
+             colorToCss(palette.borderHoverColor()),
+             numberCss(metrics.mediumRadius));
 }
 
 QString AverraStyleHelper::searchBarLineEditStyleSheet(const AverraThemePalette &palette)
 {
+    const StyleMetrics metrics = styleMetrics();
     return QStringLiteral(
                "QLineEdit#AverraSearchBarLineEdit {"
                "background: transparent;"
                "border: none;"
                "color: %1;"
-               "padding: 0 4px;"
-               "font-size: 13px;"
+               "padding: 0 %3px;"
+               "font-size: %2px;"
                "}")
-        .arg(colorToCss(palette.textPrimaryColor()));
+        .arg(colorToCss(palette.textPrimaryColor()),
+             numberCss(metrics.bodyFontSize),
+             numberCss(searchInsetHorizontal(metrics)));
 }
 
 QString AverraStyleHelper::searchBarButtonStyleSheet(const AverraThemePalette &palette, bool accentFrame)
 {
+    const StyleMetrics metrics = styleMetrics();
     QString backgroundColor;
     QString textColor;
     QString hoverBackgroundColor;
@@ -667,9 +893,9 @@ QString AverraStyleHelper::searchBarButtonStyleSheet(const AverraThemePalette &p
                "background-color: %1;"
                "color: %2;"
                "border: none;"
-               "border-radius: 9px;"
-               "padding: 8px 12px;"
-               "font-size: 12px;"
+               "border-radius: %5px;"
+               "padding: %6px %7px;"
+               "font-size: %8px;"
                "font-weight: 700;"
                "}"
                "QPushButton#AverraSearchBarButton:hover {"
@@ -681,11 +907,16 @@ QString AverraStyleHelper::searchBarButtonStyleSheet(const AverraThemePalette &p
         .arg(backgroundColor,
              textColor,
              hoverBackgroundColor,
-             pressedBackgroundColor);
+             pressedBackgroundColor,
+             numberCss(metrics.smallRadius + 1),
+             numberCss(metrics.compactPaddingVertical + 1),
+             numberCss(metrics.compactPaddingHorizontal + 2),
+             numberCss(metrics.smallFontSize));
 }
 
 QString AverraStyleHelper::cardFrameStyleSheet(const AverraThemePalette &palette, bool accentHeader)
 {
+    const StyleMetrics metrics = styleMetrics();
     QString borderColor;
     QString backgroundColor;
 
@@ -701,13 +932,14 @@ QString AverraStyleHelper::cardFrameStyleSheet(const AverraThemePalette &palette
                "QFrame#AverraCardRoot {"
                "background-color: %1;"
                "border: 1px solid %2;"
-               "border-radius: 16px;"
+               "border-radius: %3px;"
                "}")
-        .arg(backgroundColor, borderColor);
+        .arg(backgroundColor, borderColor, numberCss(metrics.cardRadius));
 }
 
 QString AverraStyleHelper::cardTitleLabelStyleSheet(const AverraThemePalette &palette, bool accentHeader)
 {
+    const StyleMetrics metrics = styleMetrics();
     QString textColor;
 
     if (accentHeader) {
@@ -719,23 +951,25 @@ QString AverraStyleHelper::cardTitleLabelStyleSheet(const AverraThemePalette &pa
     return QStringLiteral(
                "QLabel {"
                "color: %1;"
-               "font-size: 16px;"
+               "font-size: %2px;"
                "font-weight: 700;"
                "background: transparent;"
                "}")
-        .arg(textColor);
+        .arg(textColor, numberCss(metrics.titleFontSize));
 }
 
 QString AverraStyleHelper::cardSubtitleLabelStyleSheet(const AverraThemePalette &palette)
 {
+    const StyleMetrics metrics = styleMetrics();
     return QStringLiteral(
                "QLabel {"
                "color: %1;"
-               "font-size: 13px;"
+               "font-size: %2px;"
                "font-weight: 500;"
                "background: transparent;"
                "}")
-        .arg(colorToCss(palette.textSecondaryColor()));
+        .arg(colorToCss(palette.textSecondaryColor()),
+             numberCss(metrics.bodyFontSize));
 }
 
 QString AverraStyleHelper::cardContentWidgetStyleSheet(const AverraThemePalette &palette)
@@ -750,61 +984,74 @@ QString AverraStyleHelper::cardContentWidgetStyleSheet(const AverraThemePalette 
 
 QString AverraStyleHelper::infoBarFrameStyleSheet(const AverraThemePalette &palette, InfoBarType type)
 {
+    const StyleMetrics metrics = styleMetrics();
     const QPair<QColor, QColor> colors = infoBarColors(palette, type);
 
     return QStringLiteral(
                "QFrame#AverraInfoBarRoot {"
                "background-color: %1;"
                "border: 1px solid %2;"
-               "border-radius: 14px;"
+               "border-radius: %3px;"
                "}")
-        .arg(colorToCss(colors.second), colorToCss(colors.first));
+        .arg(colorToCss(colors.second),
+             colorToCss(colors.first),
+             numberCss(metrics.largeRadius));
 }
 
 QString AverraStyleHelper::infoBarBadgeStyleSheet(const AverraThemePalette &palette, InfoBarType type)
 {
+    const StyleMetrics metrics = styleMetrics();
     const QPair<QColor, QColor> colors = infoBarColors(palette, type);
 
     return QStringLiteral(
                "QLabel#AverraInfoBarBadge {"
                "background-color: %1;"
                "color: #FFFFFF;"
-               "border-radius: 12px;"
-               "font-size: 12px;"
+               "border-radius: %2px;"
+               "font-size: %3px;"
                "font-weight: 700;"
-               "padding: 4px 8px;"
+               "padding: %4px %5px;"
                "}")
-        .arg(colorToCss(colors.first));
+        .arg(colorToCss(colors.first),
+             numberCss(metrics.controlRadius),
+             numberCss(metrics.smallFontSize),
+             numberCss(compactInset(metrics)),
+             numberCss(compactInsetHorizontal(metrics)));
 }
 
 QString AverraStyleHelper::infoBarTitleLabelStyleSheet(const AverraThemePalette &palette, InfoBarType type)
 {
+    const StyleMetrics metrics = styleMetrics();
     const QPair<QColor, QColor> colors = infoBarColors(palette, type);
 
     return QStringLiteral(
                "QLabel#AverraInfoBarTitle {"
                "color: %1;"
-               "font-size: 14px;"
+               "font-size: %2px;"
                "font-weight: 700;"
                "background: transparent;"
                "}")
-        .arg(colorToCss(colors.first));
+        .arg(colorToCss(colors.first),
+             numberCss(metrics.bodyFontSize + 1));
 }
 
 QString AverraStyleHelper::infoBarDescriptionLabelStyleSheet(const AverraThemePalette &palette)
 {
+    const StyleMetrics metrics = styleMetrics();
     return QStringLiteral(
                "QLabel#AverraInfoBarDescription {"
                "color: %1;"
-               "font-size: 13px;"
+               "font-size: %2px;"
                "font-weight: 500;"
                "background: transparent;"
                "}")
-        .arg(colorToCss(palette.textSecondaryColor()));
+        .arg(colorToCss(palette.textSecondaryColor()),
+             numberCss(metrics.bodyFontSize));
 }
 
 QString AverraStyleHelper::infoBarCloseButtonStyleSheet(const AverraThemePalette &palette, InfoBarType type)
 {
+    const StyleMetrics metrics = styleMetrics();
     const QPair<QColor, QColor> colors = infoBarColors(palette, type);
 
     return QStringLiteral(
@@ -812,8 +1059,8 @@ QString AverraStyleHelper::infoBarCloseButtonStyleSheet(const AverraThemePalette
                "background-color: transparent;"
                "border: none;"
                "color: %1;"
-               "padding: 4px;"
-               "border-radius: 8px;"
+               "padding: %4px;"
+               "border-radius: %5px;"
                "}"
                "QToolButton#AverraInfoBarCloseButton:hover {"
                "background-color: %2;"
@@ -823,35 +1070,42 @@ QString AverraStyleHelper::infoBarCloseButtonStyleSheet(const AverraThemePalette
                "}")
         .arg(colorToCss(colors.first),
              colorToCss(palette.surfaceHoverColor()),
-             colorToCss(palette.surfacePressedColor()));
+             colorToCss(palette.surfacePressedColor()),
+             numberCss(compactInset(metrics)),
+             numberCss(metrics.smallRadius));
 }
 
 QString AverraStyleHelper::navigationPanelFrameStyleSheet(const AverraThemePalette &palette)
 {
+    const StyleMetrics metrics = styleMetrics();
     return QStringLiteral(
                "QFrame#AverraNavigationPanelRoot {"
                "background-color: %1;"
                "border: 1px solid %2;"
-               "border-radius: 16px;"
+               "border-radius: %3px;"
                "}")
         .arg(colorToCss(palette.surfaceRaisedColor()),
-             colorToCss(palette.borderColor()));
+             colorToCss(palette.borderColor()),
+             numberCss(metrics.cardRadius));
 }
 
 QString AverraStyleHelper::navigationPanelTitleLabelStyleSheet(const AverraThemePalette &palette)
 {
+    const StyleMetrics metrics = styleMetrics();
     return QStringLiteral(
                "QLabel#AverraNavigationPanelTitle {"
                "color: %1;"
-               "font-size: 14px;"
+               "font-size: %2px;"
                "font-weight: 700;"
                "background: transparent;"
                "}")
-        .arg(colorToCss(palette.textPrimaryColor()));
+        .arg(colorToCss(palette.textPrimaryColor()),
+             numberCss(metrics.titleFontSize - 1));
 }
 
 QString AverraStyleHelper::navigationPanelItemButtonStyleSheet(const AverraThemePalette &palette, bool current)
 {
+    const StyleMetrics metrics = styleMetrics();
     QString backgroundColor;
     QString textColor;
     QString borderColor;
@@ -883,10 +1137,10 @@ QString AverraStyleHelper::navigationPanelItemButtonStyleSheet(const AverraTheme
                "background-color: %1;"
                "color: %2;"
                "border: 1px solid %3;"
-               "border-radius: 10px;"
-               "padding: 10px 14px;"
+               "border-radius: %8px;"
+               "padding: %9px %10px;"
                "text-align: left;"
-               "font-size: 13px;"
+               "font-size: %11px;"
                "font-weight: 600;"
                "}"
                "QPushButton:hover {"
@@ -896,8 +1150,8 @@ QString AverraStyleHelper::navigationPanelItemButtonStyleSheet(const AverraTheme
                "}"
                "QPushButton:pressed {"
                "background-color: %7;"
-               "padding-top: 11px;"
-               "padding-bottom: 9px;"
+               "padding-top: %12px;"
+               "padding-bottom: %13px;"
                "}")
         .arg(backgroundColor,
              textColor,
@@ -905,11 +1159,18 @@ QString AverraStyleHelper::navigationPanelItemButtonStyleSheet(const AverraTheme
              hoverBackgroundColor,
              hoverBorderColor,
              hoverTextColor,
-             pressedBackgroundColor);
+             pressedBackgroundColor,
+             numberCss(metrics.controlRadius),
+             numberCss(metrics.buttonPaddingVertical),
+             numberCss(metrics.buttonPaddingHorizontal - 4),
+             numberCss(metrics.bodyFontSize),
+             numberCss(metrics.buttonPaddingVertical + 1),
+             numberCss(metrics.buttonPaddingVertical - 1));
 }
 
 QString AverraStyleHelper::tagStyleSheet(const AverraThemePalette &palette, TagTone tone, bool filled)
 {
+    const StyleMetrics metrics = styleMetrics();
     const QPair<QColor, QColor> colors = tagColors(palette, tone);
     QString backgroundColor;
     QString borderColor;
@@ -930,48 +1191,60 @@ QString AverraStyleHelper::tagStyleSheet(const AverraThemePalette &palette, TagT
                "background-color: %1;"
                "color: %2;"
                "border: 1px solid %3;"
-               "border-radius: 999px;"
-               "padding: 4px 10px;"
-               "font-size: 12px;"
+               "border-radius: %4px;"
+               "padding: %5px %6px;"
+               "font-size: %7px;"
                "font-weight: 700;"
                "}")
-        .arg(backgroundColor, textColor, borderColor);
+        .arg(backgroundColor,
+             textColor,
+             borderColor,
+             numberCss(capsuleRadius(metrics)),
+             numberCss(compactInset(metrics)),
+             numberCss(metrics.compactPaddingHorizontal),
+             numberCss(metrics.smallFontSize));
 }
 
 QString AverraStyleHelper::sectionHeaderTitleLabelStyleSheet(const AverraThemePalette &palette)
 {
+    const StyleMetrics metrics = styleMetrics();
     return QStringLiteral(
                "QLabel#AverraSectionHeaderTitle {"
                "color: %1;"
-               "font-size: 16px;"
+               "font-size: %2px;"
                "font-weight: 700;"
                "background: transparent;"
                "}")
-        .arg(colorToCss(palette.textPrimaryColor()));
+        .arg(colorToCss(palette.textPrimaryColor()),
+             numberCss(metrics.titleFontSize));
 }
 
 QString AverraStyleHelper::sectionHeaderSubtitleLabelStyleSheet(const AverraThemePalette &palette)
 {
+    const StyleMetrics metrics = styleMetrics();
     return QStringLiteral(
                "QLabel#AverraSectionHeaderSubtitle {"
                "color: %1;"
-               "font-size: 13px;"
+               "font-size: %2px;"
                "font-weight: 500;"
                "background: transparent;"
                "}")
-        .arg(colorToCss(palette.textSecondaryColor()));
+        .arg(colorToCss(palette.textSecondaryColor()),
+             numberCss(metrics.bodyFontSize));
 }
 
 QString AverraStyleHelper::sectionHeaderMetaLabelStyleSheet(const AverraThemePalette &palette)
 {
+    const StyleMetrics metrics = styleMetrics();
     return QStringLiteral(
                "QLabel#AverraSectionHeaderMeta {"
                "color: %1;"
-               "font-size: 12px;"
+               "font-size: %2px;"
                "font-weight: 700;"
                "background: transparent;"
                "}")
-        .arg(colorToCss(palette.accentColor()));
+        .arg(colorToCss(palette.accentColor()),
+             numberCss(metrics.smallFontSize));
 }
 
 QString AverraStyleHelper::sectionHeaderDividerStyleSheet(const AverraThemePalette &palette)
@@ -988,54 +1261,63 @@ QString AverraStyleHelper::sectionHeaderDividerStyleSheet(const AverraThemePalet
 
 QString AverraStyleHelper::emptyStateFrameStyleSheet(const AverraThemePalette &palette)
 {
+    const StyleMetrics metrics = styleMetrics();
     return QStringLiteral(
                "QFrame#AverraEmptyStateRoot {"
                "background-color: %1;"
                "border: 1px dashed %2;"
-               "border-radius: 18px;"
+               "border-radius: %3px;"
                "}")
         .arg(colorToCss(palette.surfaceRaisedColor()),
-             colorToCss(palette.borderColor()));
+             colorToCss(palette.borderColor()),
+             numberCss(metrics.panelRadius));
 }
 
 QString AverraStyleHelper::emptyStateIconLabelStyleSheet(const AverraThemePalette &palette)
 {
+    const StyleMetrics metrics = styleMetrics();
     return QStringLiteral(
                "QLabel#AverraEmptyStateIcon {"
                "color: %1;"
-               "font-size: 28px;"
+               "font-size: %2px;"
                "font-weight: 700;"
                "background: transparent;"
                "}")
-        .arg(colorToCss(palette.accentColor()));
+        .arg(colorToCss(palette.accentColor()),
+             numberCss(metrics.displayFontSize));
 }
 
 QString AverraStyleHelper::emptyStateTitleLabelStyleSheet(const AverraThemePalette &palette)
 {
+    const StyleMetrics metrics = styleMetrics();
     return QStringLiteral(
                "QLabel#AverraEmptyStateTitle {"
                "color: %1;"
-               "font-size: 16px;"
+               "font-size: %2px;"
                "font-weight: 700;"
                "background: transparent;"
                "}")
-        .arg(colorToCss(palette.textPrimaryColor()));
+        .arg(colorToCss(palette.textPrimaryColor()),
+             numberCss(metrics.titleFontSize));
 }
 
 QString AverraStyleHelper::emptyStateDescriptionLabelStyleSheet(const AverraThemePalette &palette)
 {
+    const StyleMetrics metrics = styleMetrics();
     return QStringLiteral(
                "QLabel#AverraEmptyStateDescription {"
                "color: %1;"
-               "font-size: 13px;"
+               "font-size: %2px;"
                "font-weight: 500;"
                "background: transparent;"
                "}")
-        .arg(colorToCss(palette.textSecondaryColor()));
+        .arg(colorToCss(palette.textSecondaryColor()),
+             numberCss(metrics.bodyFontSize));
 }
 
 QString AverraStyleHelper::statisticCardFrameStyleSheet(const AverraThemePalette &palette, bool accent)
 {
+    const StyleMetrics metrics = styleMetrics();
     QString backgroundColor;
     QString borderColor;
 
@@ -1051,13 +1333,14 @@ QString AverraStyleHelper::statisticCardFrameStyleSheet(const AverraThemePalette
                "QFrame#AverraStatisticCardRoot {"
                "background-color: %1;"
                "border: 1px solid %2;"
-               "border-radius: 16px;"
+               "border-radius: %3px;"
                "}")
-        .arg(backgroundColor, borderColor);
+        .arg(backgroundColor, borderColor, numberCss(metrics.cardRadius));
 }
 
 QString AverraStyleHelper::statisticCardCaptionLabelStyleSheet(const AverraThemePalette &palette, bool accent)
 {
+    const StyleMetrics metrics = styleMetrics();
     QString textColor;
 
     if (accent) {
@@ -1069,15 +1352,17 @@ QString AverraStyleHelper::statisticCardCaptionLabelStyleSheet(const AverraTheme
     return QStringLiteral(
                "QLabel#AverraStatisticCardCaption {"
                "color: %1;"
-               "font-size: 12px;"
+               "font-size: %2px;"
                "font-weight: 700;"
                "background: transparent;"
                "}")
-        .arg(textColor);
+        .arg(textColor,
+             numberCss(metrics.smallFontSize));
 }
 
 QString AverraStyleHelper::statisticCardValueLabelStyleSheet(const AverraThemePalette &palette, bool accent)
 {
+    const StyleMetrics metrics = styleMetrics();
     QString textColor;
 
     if (accent) {
@@ -1089,27 +1374,31 @@ QString AverraStyleHelper::statisticCardValueLabelStyleSheet(const AverraThemePa
     return QStringLiteral(
                "QLabel#AverraStatisticCardValue {"
                "color: %1;"
-               "font-size: 28px;"
+               "font-size: %2px;"
                "font-weight: 700;"
                "background: transparent;"
                "}")
-        .arg(textColor);
+        .arg(textColor,
+             numberCss(metrics.displayFontSize));
 }
 
 QString AverraStyleHelper::statisticCardHelperLabelStyleSheet(const AverraThemePalette &palette)
 {
+    const StyleMetrics metrics = styleMetrics();
     return QStringLiteral(
                "QLabel#AverraStatisticCardHelper {"
                "color: %1;"
-               "font-size: 12px;"
+               "font-size: %2px;"
                "font-weight: 500;"
                "background: transparent;"
                "}")
-        .arg(colorToCss(palette.textSecondaryColor()));
+        .arg(colorToCss(palette.textSecondaryColor()),
+             numberCss(metrics.smallFontSize));
 }
 
 QString AverraStyleHelper::statisticCardBadgeLabelStyleSheet(const AverraThemePalette &palette, bool accent)
 {
+    const StyleMetrics metrics = styleMetrics();
     QString backgroundColor;
     QString textColor;
 
@@ -1125,16 +1414,22 @@ QString AverraStyleHelper::statisticCardBadgeLabelStyleSheet(const AverraThemePa
                "QLabel#AverraStatisticCardBadge {"
                "background-color: %1;"
                "color: %2;"
-               "border-radius: 999px;"
-               "padding: 4px 8px;"
-               "font-size: 11px;"
+               "border-radius: %3px;"
+               "padding: %4px %5px;"
+               "font-size: %6px;"
                "font-weight: 700;"
                "}")
-        .arg(backgroundColor, textColor);
+        .arg(backgroundColor,
+             textColor,
+             numberCss(capsuleRadius(metrics)),
+             numberCss(compactInset(metrics)),
+             numberCss(compactInsetHorizontal(metrics)),
+             numberCss(metrics.smallFontSize - 1));
 }
 
 QString AverraStyleHelper::toolbarFrameStyleSheet(const AverraThemePalette &palette, bool accent)
 {
+    const StyleMetrics metrics = styleMetrics();
     QString backgroundColor;
     QString borderColor;
 
@@ -1150,13 +1445,14 @@ QString AverraStyleHelper::toolbarFrameStyleSheet(const AverraThemePalette &pale
                "QFrame#AverraToolbarRoot {"
                "background-color: %1;"
                "border: 1px solid %2;"
-               "border-radius: 16px;"
+               "border-radius: %3px;"
                "}")
-        .arg(backgroundColor, borderColor);
+        .arg(backgroundColor, borderColor, numberCss(metrics.cardRadius));
 }
 
 QString AverraStyleHelper::toolbarTitleLabelStyleSheet(const AverraThemePalette &palette, bool accent)
 {
+    const StyleMetrics metrics = styleMetrics();
     QString textColor;
 
     if (accent) {
@@ -1168,27 +1464,30 @@ QString AverraStyleHelper::toolbarTitleLabelStyleSheet(const AverraThemePalette 
     return QStringLiteral(
                "QLabel#AverraToolbarTitle {"
                "color: %1;"
-               "font-size: 15px;"
+               "font-size: %2px;"
                "font-weight: 700;"
                "background: transparent;"
                "}")
-        .arg(textColor);
+        .arg(textColor, numberCss(metrics.titleFontSize));
 }
 
 QString AverraStyleHelper::toolbarSubtitleLabelStyleSheet(const AverraThemePalette &palette)
 {
+    const StyleMetrics metrics = styleMetrics();
     return QStringLiteral(
                "QLabel#AverraToolbarSubtitle {"
                "color: %1;"
-               "font-size: 12px;"
+               "font-size: %2px;"
                "font-weight: 500;"
                "background: transparent;"
                "}")
-        .arg(colorToCss(palette.textSecondaryColor()));
+        .arg(colorToCss(palette.textSecondaryColor()),
+             numberCss(metrics.smallFontSize));
 }
 
 QString AverraStyleHelper::paginationButtonStyleSheet(const AverraThemePalette &palette, bool current)
 {
+    const StyleMetrics metrics = styleMetrics();
     QString backgroundColor;
     QString borderColor;
     QString textColor;
@@ -1226,11 +1525,11 @@ QString AverraStyleHelper::paginationButtonStyleSheet(const AverraThemePalette &
                "background-color: %1;"
                "color: %2;"
                "border: 1px solid %3;"
-               "border-radius: 10px;"
-               "padding: 7px 10px;"
-               "font-size: 12px;"
+               "border-radius: %10px;"
+               "padding: %11px %12px;"
+               "font-size: %13px;"
                "font-weight: 700;"
-               "min-width: 34px;"
+               "min-width: %14px;"
                "}"
                "QPushButton:hover {"
                "background-color: %4;"
@@ -1252,143 +1551,171 @@ QString AverraStyleHelper::paginationButtonStyleSheet(const AverraThemePalette &
              pressedBackgroundColor,
              disabledBackgroundColor,
              disabledTextColor,
-             disabledBorderColor);
+             disabledBorderColor,
+             numberCss(metrics.controlRadius),
+             numberCss(metrics.compactPaddingVertical + 1),
+             numberCss(metrics.compactPaddingHorizontal),
+             numberCss(metrics.smallFontSize),
+             numberCss(paginationMinWidth(metrics)));
 }
 
 QString AverraStyleHelper::paginationLabelStyleSheet(const AverraThemePalette &palette)
 {
+    const StyleMetrics metrics = styleMetrics();
     return QStringLiteral(
                "QLabel#AverraPaginationLabel {"
                "color: %1;"
-               "font-size: 12px;"
+               "font-size: %2px;"
                "font-weight: 600;"
                "background: transparent;"
                "}")
-        .arg(colorToCss(palette.textSecondaryColor()));
+        .arg(colorToCss(palette.textSecondaryColor()),
+             numberCss(metrics.smallFontSize));
 }
 
 QString AverraStyleHelper::propertyItemFrameStyleSheet(const AverraThemePalette &palette)
 {
+    const StyleMetrics metrics = styleMetrics();
     return QStringLiteral(
                "QFrame#AverraPropertyItemRoot {"
                "background-color: %1;"
                "border: 1px solid %2;"
-               "border-radius: 14px;"
+               "border-radius: %3px;"
                "}")
         .arg(colorToCss(palette.surfaceRaisedColor()),
-             colorToCss(palette.borderColor()));
+             colorToCss(palette.borderColor()),
+             numberCss(metrics.largeRadius));
 }
 
 QString AverraStyleHelper::propertyItemTitleLabelStyleSheet(const AverraThemePalette &palette)
 {
+    const StyleMetrics metrics = styleMetrics();
     return QStringLiteral(
                "QLabel#AverraPropertyItemTitle {"
                "color: %1;"
-               "font-size: 13px;"
+               "font-size: %2px;"
                "font-weight: 700;"
                "background: transparent;"
                "}")
-        .arg(colorToCss(palette.textPrimaryColor()));
+        .arg(colorToCss(palette.textPrimaryColor()),
+             numberCss(metrics.bodyFontSize));
 }
 
 QString AverraStyleHelper::propertyItemDescriptionLabelStyleSheet(const AverraThemePalette &palette)
 {
+    const StyleMetrics metrics = styleMetrics();
     return QStringLiteral(
                "QLabel#AverraPropertyItemDescription {"
                "color: %1;"
-               "font-size: 12px;"
+               "font-size: %2px;"
                "font-weight: 500;"
                "background: transparent;"
                "}")
-        .arg(colorToCss(palette.textSecondaryColor()));
+        .arg(colorToCss(palette.textSecondaryColor()),
+             numberCss(metrics.smallFontSize));
 }
 
 QString AverraStyleHelper::formSectionFrameStyleSheet(const AverraThemePalette &palette)
 {
+    const StyleMetrics metrics = styleMetrics();
     return QStringLiteral(
                "QFrame#AverraFormSectionRoot {"
                "background-color: %1;"
                "border: 1px solid %2;"
-               "border-radius: 18px;"
+               "border-radius: %3px;"
                "}")
         .arg(colorToCss(palette.surfaceRaisedColor()),
-             colorToCss(palette.borderColor()));
+             colorToCss(palette.borderColor()),
+             numberCss(metrics.panelRadius));
 }
 
 QString AverraStyleHelper::settingsPageFrameStyleSheet(const AverraThemePalette &palette)
 {
+    const StyleMetrics metrics = styleMetrics();
     return QStringLiteral(
                "QFrame#AverraSettingsPageRoot {"
                "background-color: %1;"
                "border: 1px solid %2;"
-               "border-radius: 20px;"
+               "border-radius: %3px;"
                "}")
         .arg(colorToCss(palette.surfaceColor()),
-             colorToCss(palette.borderColor()));
+             colorToCss(palette.borderColor()),
+             numberCss(metrics.pageRadius));
 }
 
 QString AverraStyleHelper::settingsPageTitleLabelStyleSheet(const AverraThemePalette &palette)
 {
+    const StyleMetrics metrics = styleMetrics();
     return QStringLiteral(
                "QLabel#AverraSettingsPageTitle {"
                "color: %1;"
-               "font-size: 18px;"
+               "font-size: %2px;"
                "font-weight: 700;"
                "background: transparent;"
                "}")
-        .arg(colorToCss(palette.textPrimaryColor()));
+        .arg(colorToCss(palette.textPrimaryColor()),
+             numberCss(metrics.pageTitleFontSize));
 }
 
 QString AverraStyleHelper::settingsPageDescriptionLabelStyleSheet(const AverraThemePalette &palette)
 {
+    const StyleMetrics metrics = styleMetrics();
     return QStringLiteral(
                "QLabel#AverraSettingsPageDescription {"
                "color: %1;"
-               "font-size: 13px;"
+               "font-size: %2px;"
                "font-weight: 500;"
                "background: transparent;"
                "}")
-        .arg(colorToCss(palette.textSecondaryColor()));
+        .arg(colorToCss(palette.textSecondaryColor()),
+             numberCss(metrics.bodyFontSize));
 }
 
 QString AverraStyleHelper::dataTableFrameStyleSheet(const AverraThemePalette &palette)
 {
+    const StyleMetrics metrics = styleMetrics();
     return QStringLiteral(
                "QFrame#AverraDataTableRoot {"
                "background-color: %1;"
                "border: 1px solid %2;"
-               "border-radius: 16px;"
+               "border-radius: %3px;"
                "}")
         .arg(colorToCss(palette.surfaceRaisedColor()),
-             colorToCss(palette.borderColor()));
+             colorToCss(palette.borderColor()),
+             numberCss(metrics.cardRadius));
 }
 
 QString AverraStyleHelper::dataTableTitleLabelStyleSheet(const AverraThemePalette &palette)
 {
+    const StyleMetrics metrics = styleMetrics();
     return QStringLiteral(
                "QLabel#AverraDataTableTitle {"
                "color: %1;"
-               "font-size: 14px;"
+               "font-size: %2px;"
                "font-weight: 700;"
                "background: transparent;"
                "}")
-        .arg(colorToCss(palette.textPrimaryColor()));
+        .arg(colorToCss(palette.textPrimaryColor()),
+             numberCss(metrics.bodyFontSize + 1));
 }
 
 QString AverraStyleHelper::dataTableSubtitleLabelStyleSheet(const AverraThemePalette &palette)
 {
+    const StyleMetrics metrics = styleMetrics();
     return QStringLiteral(
                "QLabel#AverraDataTableSubtitle {"
                "color: %1;"
-               "font-size: 12px;"
+               "font-size: %2px;"
                "font-weight: 500;"
                "background: transparent;"
                "}")
-        .arg(colorToCss(palette.textSecondaryColor()));
+        .arg(colorToCss(palette.textSecondaryColor()),
+             numberCss(metrics.smallFontSize));
 }
 
 QString AverraStyleHelper::dataTableViewStyleSheet(const AverraThemePalette &palette)
 {
+    const StyleMetrics metrics = styleMetrics();
     return QStringLiteral(
                "QTableView {"
                "background-color: %1;"
@@ -1402,15 +1729,17 @@ QString AverraStyleHelper::dataTableViewStyleSheet(const AverraThemePalette &pal
                "background-color: %4;"
                "color: %5;"
                "border: none;"
-               "padding: 8px;"
-               "font-size: 12px;"
+               "padding: %6px;"
+               "font-size: %7px;"
                "font-weight: 700;"
                "}")
         .arg(colorToCss(palette.surfaceRaisedColor()),
              colorToCss(palette.borderColor()),
              colorToCss(palette.accentColor()),
              colorToCss(palette.surfaceColor()),
-             colorToCss(palette.textPrimaryColor()));
+             colorToCss(palette.textPrimaryColor()),
+             numberCss(tableHeaderPadding(metrics)),
+             numberCss(metrics.smallFontSize));
 }
 
 QString AverraStyleHelper::dataTableToolbarFrameStyleSheet(const AverraThemePalette &palette)
@@ -1425,14 +1754,15 @@ QString AverraStyleHelper::dataTableToolbarFrameStyleSheet(const AverraThemePale
 
 QString AverraStyleHelper::dataTableActionButtonStyleSheet(const AverraThemePalette &palette)
 {
+    const StyleMetrics metrics = styleMetrics();
     return QStringLiteral(
                "QPushButton {"
                "background-color: %1;"
                "color: %2;"
                "border: 1px solid %3;"
-               "border-radius: 8px;"
-               "padding: 4px 8px;"
-               "font-size: 11px;"
+               "border-radius: %9px;"
+               "padding: %10px %11px;"
+               "font-size: %12px;"
                "font-weight: 700;"
                "}"
                "QPushButton:hover {"
@@ -1454,11 +1784,16 @@ QString AverraStyleHelper::dataTableActionButtonStyleSheet(const AverraThemePale
              colorToCss(palette.borderHoverColor()),
              colorToCss(palette.surfacePressedColor()),
              colorToCss(palette.surfaceDisabledColor()),
-             colorToCss(palette.textDisabledColor()));
+             colorToCss(palette.textDisabledColor()),
+             numberCss(metrics.smallRadius),
+             numberCss(metrics.compactPaddingVertical - 1),
+             numberCss(metrics.compactPaddingHorizontal - 2),
+             numberCss(metrics.smallFontSize - 1));
 }
 
 QString AverraStyleHelper::tabButtonStyleSheet(const AverraThemePalette &palette, bool current)
 {
+    const StyleMetrics metrics = styleMetrics();
     QString backgroundColor;
     QString borderColor;
     QString textColor;
@@ -1487,9 +1822,9 @@ QString AverraStyleHelper::tabButtonStyleSheet(const AverraThemePalette &palette
                "background-color: %1;"
                "color: %2;"
                "border: 1px solid %3;"
-               "border-radius: 10px;"
-               "padding: 8px 14px;"
-               "font-size: 12px;"
+               "border-radius: %7px;"
+               "padding: %8px %9px;"
+               "font-size: %10px;"
                "font-weight: 700;"
                "}"
                "QPushButton:hover {"
@@ -1504,19 +1839,24 @@ QString AverraStyleHelper::tabButtonStyleSheet(const AverraThemePalette &palette
              borderColor,
              hoverBackgroundColor,
              hoverBorderColor,
-             pressedBackgroundColor);
+             pressedBackgroundColor,
+             numberCss(metrics.controlRadius),
+             numberCss(metrics.compactPaddingVertical + 1),
+             numberCss(metrics.buttonPaddingHorizontal - 4),
+             numberCss(metrics.smallFontSize));
 }
 
 QString AverraStyleHelper::segmentedButtonStyleSheet(const AverraThemePalette &palette, bool current, bool first, bool last)
 {
+    const StyleMetrics metrics = styleMetrics();
     QString backgroundColor;
     QString borderColor;
     QString textColor;
     QString hoverBackgroundColor;
     QString hoverBorderColor;
     QString pressedBackgroundColor;
-    QString radiusLeft = first ? QStringLiteral("10px") : QStringLiteral("0px");
-    QString radiusRight = last ? QStringLiteral("10px") : QStringLiteral("0px");
+    QString radiusLeft = first ? QStringLiteral("%1px").arg(metrics.controlRadius) : QStringLiteral("0px");
+    QString radiusRight = last ? QStringLiteral("%1px").arg(metrics.controlRadius) : QStringLiteral("0px");
 
     if (current) {
         backgroundColor = colorToCss(palette.accentColor());
@@ -1543,8 +1883,8 @@ QString AverraStyleHelper::segmentedButtonStyleSheet(const AverraThemePalette &p
                "border-bottom-left-radius: %4;"
                "border-top-right-radius: %5;"
                "border-bottom-right-radius: %5;"
-               "padding: 8px 12px;"
-               "font-size: 12px;"
+               "padding: %9px %10px;"
+               "font-size: %11px;"
                "font-weight: 700;"
                "}"
                "QPushButton:hover {"
@@ -1561,120 +1901,143 @@ QString AverraStyleHelper::segmentedButtonStyleSheet(const AverraThemePalette &p
              radiusRight,
              hoverBackgroundColor,
              hoverBorderColor,
-             pressedBackgroundColor);
+             pressedBackgroundColor,
+             numberCss(metrics.compactPaddingVertical + 1),
+             numberCss(metrics.compactPaddingHorizontal + 2),
+             numberCss(metrics.smallFontSize));
 }
 
 QString AverraStyleHelper::dialogFrameStyleSheet(const AverraThemePalette &palette)
 {
+    const StyleMetrics metrics = styleMetrics();
     return QStringLiteral(
                "QFrame#AverraDialogRoot {"
                "background-color: %1;"
                "border: 1px solid %2;"
-               "border-radius: 0px;"
+               "border-radius: %3px;"
                "}")
         .arg(colorToCss(palette.surfaceRaisedColor()),
-             colorToCss(palette.borderColor()));
+             colorToCss(palette.borderColor()),
+             numberCss(metrics.cardRadius));
 }
 
 QString AverraStyleHelper::dialogTitleLabelStyleSheet(const AverraThemePalette &palette)
 {
+    const StyleMetrics metrics = styleMetrics();
     return QStringLiteral(
                "QLabel#AverraDialogTitle {"
                "color: %1;"
-               "font-size: 18px;"
+               "font-size: %2px;"
                "font-weight: 700;"
                "background: transparent;"
                "}")
-        .arg(colorToCss(palette.textPrimaryColor()));
+        .arg(colorToCss(palette.textPrimaryColor()),
+             numberCss(metrics.pageTitleFontSize));
 }
 
 QString AverraStyleHelper::dialogDescriptionLabelStyleSheet(const AverraThemePalette &palette)
 {
+    const StyleMetrics metrics = styleMetrics();
     return QStringLiteral(
                "QLabel#AverraDialogDescription {"
                "color: %1;"
-               "font-size: 13px;"
+               "font-size: %2px;"
                "font-weight: 500;"
                "background: transparent;"
                "}")
-        .arg(colorToCss(palette.textSecondaryColor()));
+        .arg(colorToCss(palette.textSecondaryColor()),
+             numberCss(metrics.bodyFontSize));
 }
 
 QString AverraStyleHelper::toastFrameStyleSheet(const AverraThemePalette &palette, InfoBarType type)
 {
+    const StyleMetrics metrics = styleMetrics();
     const QPair<QColor, QColor> colors = infoBarColors(palette, type);
     return QStringLiteral(
                "QFrame#AverraToastRoot {"
                "background-color: %1;"
                "border: 1px solid %2;"
-               "border-radius: 14px;"
+               "border-radius: %3px;"
                "}")
-        .arg(colorToCss(colors.second), colorToCss(colors.first));
+        .arg(colorToCss(colors.second),
+             colorToCss(colors.first),
+             numberCss(metrics.largeRadius));
 }
 
 QString AverraStyleHelper::toastTitleLabelStyleSheet(const AverraThemePalette &palette, InfoBarType type)
 {
+    const StyleMetrics metrics = styleMetrics();
     const QPair<QColor, QColor> colors = infoBarColors(palette, type);
     return QStringLiteral(
                "QLabel#AverraToastTitle {"
                "color: %1;"
-               "font-size: 13px;"
+               "font-size: %2px;"
                "font-weight: 700;"
                "background: transparent;"
                "}")
-        .arg(colorToCss(colors.first));
+        .arg(colorToCss(colors.first),
+             numberCss(metrics.bodyFontSize));
 }
 
 QString AverraStyleHelper::toastDescriptionLabelStyleSheet(const AverraThemePalette &palette)
 {
+    const StyleMetrics metrics = styleMetrics();
     return QStringLiteral(
                "QLabel#AverraToastDescription {"
                "color: %1;"
-               "font-size: 12px;"
+               "font-size: %2px;"
                "font-weight: 500;"
                "background: transparent;"
                "}")
-        .arg(colorToCss(palette.textSecondaryColor()));
+        .arg(colorToCss(palette.textSecondaryColor()),
+             numberCss(metrics.smallFontSize));
 }
 
 QString AverraStyleHelper::ribbonBarFrameStyleSheet(const AverraThemePalette &palette)
 {
+    const StyleMetrics metrics = styleMetrics();
     return QStringLiteral(
                "QFrame#AverraRibbonBarRoot {"
                "background-color: %1;"
                "border: 1px solid %2;"
-               "border-radius: 18px;"
+               "border-radius: %3px;"
                "}")
         .arg(colorToCss(palette.surfaceRaisedColor()),
-             colorToCss(palette.borderColor()));
+             colorToCss(palette.borderColor()),
+             numberCss(metrics.panelRadius));
 }
 
 QString AverraStyleHelper::ribbonBarTitleLabelStyleSheet(const AverraThemePalette &palette)
 {
+    const StyleMetrics metrics = styleMetrics();
     return QStringLiteral(
                "QLabel#AverraRibbonBarTitle {"
                "color: %1;"
-               "font-size: 18px;"
+               "font-size: %2px;"
                "font-weight: 700;"
                "background: transparent;"
                "}")
-        .arg(colorToCss(palette.textPrimaryColor()));
+        .arg(colorToCss(palette.textPrimaryColor()),
+             numberCss(metrics.pageTitleFontSize));
 }
 
 QString AverraStyleHelper::ribbonBarSubtitleLabelStyleSheet(const AverraThemePalette &palette)
 {
+    const StyleMetrics metrics = styleMetrics();
     return QStringLiteral(
                "QLabel#AverraRibbonBarSubtitle {"
                "color: %1;"
-               "font-size: 12px;"
+               "font-size: %2px;"
                "font-weight: 500;"
                "background: transparent;"
                "}")
-        .arg(colorToCss(palette.textSecondaryColor()));
+        .arg(colorToCss(palette.textSecondaryColor()),
+             numberCss(metrics.smallFontSize));
 }
 
 QString AverraStyleHelper::ribbonBarTabButtonStyleSheet(const AverraThemePalette &palette, bool current)
 {
+    const StyleMetrics metrics = styleMetrics();
     QString backgroundColor;
     QString borderColor;
     QString textColor;
@@ -1697,9 +2060,9 @@ QString AverraStyleHelper::ribbonBarTabButtonStyleSheet(const AverraThemePalette
                "background-color: %1;"
                "color: %2;"
                "border: 1px solid %3;"
-               "border-radius: 10px;"
-               "padding: 8px 12px;"
-               "font-size: 12px;"
+               "border-radius: %6px;"
+               "padding: %7px %8px;"
+               "font-size: %9px;"
                "font-weight: 700;"
                "}"
                "QPushButton:hover {"
@@ -1710,59 +2073,72 @@ QString AverraStyleHelper::ribbonBarTabButtonStyleSheet(const AverraThemePalette
              textColor,
              borderColor,
              hoverBackgroundColor,
-             colorToCss(current ? palette.accentHoverColor() : palette.borderHoverColor()));
+             colorToCss(current ? palette.accentHoverColor() : palette.borderHoverColor()),
+             numberCss(metrics.controlRadius),
+             numberCss(metrics.compactPaddingVertical + 1),
+             numberCss(metrics.compactPaddingHorizontal + 2),
+             numberCss(metrics.smallFontSize));
 }
 
 QString AverraStyleHelper::ribbonBarGroupFrameStyleSheet(const AverraThemePalette &palette)
 {
+    const StyleMetrics metrics = styleMetrics();
     return QStringLiteral(
                "QFrame#AverraRibbonGroupRoot {"
                "background-color: %1;"
                "border: 1px solid %2;"
-               "border-radius: 14px;"
+               "border-radius: %3px;"
                "}")
         .arg(colorToCss(palette.surfaceColor()),
-             colorToCss(palette.borderColor()));
+             colorToCss(palette.borderColor()),
+             numberCss(metrics.largeRadius));
 }
 
 QString AverraStyleHelper::ribbonBarGroupTitleLabelStyleSheet(const AverraThemePalette &palette)
 {
+    const StyleMetrics metrics = styleMetrics();
     return QStringLiteral(
                "QLabel#AverraRibbonGroupTitle {"
                "color: %1;"
-               "font-size: 11px;"
+               "font-size: %2px;"
                "font-weight: 700;"
                "background: transparent;"
                "}")
-        .arg(colorToCss(palette.textSecondaryColor()));
+        .arg(colorToCss(palette.textSecondaryColor()),
+             numberCss(metrics.smallFontSize - 1));
 }
 
 QString AverraStyleHelper::treeViewFrameStyleSheet(const AverraThemePalette &palette)
 {
+    const StyleMetrics metrics = styleMetrics();
     return QStringLiteral(
                "QFrame#AverraTreeViewRoot {"
                "background-color: %1;"
                "border: 1px solid %2;"
-               "border-radius: 16px;"
+               "border-radius: %3px;"
                "}")
         .arg(colorToCss(palette.surfaceRaisedColor()),
-             colorToCss(palette.borderColor()));
+             colorToCss(palette.borderColor()),
+             numberCss(metrics.cardRadius));
 }
 
 QString AverraStyleHelper::treeViewTitleLabelStyleSheet(const AverraThemePalette &palette)
 {
+    const StyleMetrics metrics = styleMetrics();
     return QStringLiteral(
                "QLabel#AverraTreeViewTitle {"
                "color: %1;"
-               "font-size: 14px;"
+               "font-size: %2px;"
                "font-weight: 700;"
                "background: transparent;"
                "}")
-        .arg(colorToCss(palette.textPrimaryColor()));
+        .arg(colorToCss(palette.textPrimaryColor()),
+             numberCss(metrics.bodyFontSize + 1));
 }
 
 QString AverraStyleHelper::treeViewViewStyleSheet(const AverraThemePalette &palette)
 {
+    const StyleMetrics metrics = styleMetrics();
     return QStringLiteral(
                "QTreeView {"
                "background-color: %1;"
@@ -1775,74 +2151,85 @@ QString AverraStyleHelper::treeViewViewStyleSheet(const AverraThemePalette &pale
                "background-color: %2;"
                "color: %4;"
                "border: none;"
-               "padding: 8px;"
-               "font-size: 12px;"
+               "padding: %5px;"
+               "font-size: %6px;"
                "font-weight: 700;"
                "}")
         .arg(colorToCss(palette.surfaceRaisedColor()),
              colorToCss(palette.surfaceColor()),
              colorToCss(palette.accentColor()),
-             colorToCss(palette.textPrimaryColor()));
+             colorToCss(palette.textPrimaryColor()),
+             numberCss(tableHeaderPadding(metrics)),
+             numberCss(metrics.smallFontSize));
 }
 
 QString AverraStyleHelper::dockFrameStyleSheet(const AverraThemePalette &palette)
 {
+    const StyleMetrics metrics = styleMetrics();
     return QStringLiteral(
                "QFrame#AverraDockRoot {"
                "background-color: %1;"
                "border: 1px solid %2;"
-               "border-radius: 16px;"
+               "border-radius: %3px;"
                "}")
         .arg(colorToCss(palette.surfaceRaisedColor()),
-             colorToCss(palette.borderColor()));
+             colorToCss(palette.borderColor()),
+             numberCss(metrics.cardRadius));
 }
 
 QString AverraStyleHelper::dockTitleBarFrameStyleSheet(const AverraThemePalette &palette)
 {
+    const StyleMetrics metrics = styleMetrics();
     return QStringLiteral(
                "QFrame#AverraDockTitleBar {"
                "background-color: %1;"
                "border-bottom: 1px solid %2;"
-               "border-top-left-radius: 16px;"
-               "border-top-right-radius: 16px;"
+               "border-top-left-radius: %3px;"
+               "border-top-right-radius: %3px;"
                "}")
         .arg(colorToCss(palette.surfaceHoverColor()),
-             colorToCss(palette.borderColor()));
+             colorToCss(palette.borderColor()),
+             numberCss(metrics.cardRadius));
 }
 
 QString AverraStyleHelper::dockTitleLabelStyleSheet(const AverraThemePalette &palette)
 {
+    const StyleMetrics metrics = styleMetrics();
     return QStringLiteral(
                "QLabel#AverraDockTitle {"
                "color: %1;"
-               "font-size: 14px;"
+               "font-size: %2px;"
                "font-weight: 700;"
                "background: transparent;"
                "}")
-        .arg(colorToCss(palette.textPrimaryColor()));
+        .arg(colorToCss(palette.textPrimaryColor()),
+             numberCss(metrics.bodyFontSize + 1));
 }
 
 QString AverraStyleHelper::dockDescriptionLabelStyleSheet(const AverraThemePalette &palette)
 {
+    const StyleMetrics metrics = styleMetrics();
     return QStringLiteral(
                "QLabel#AverraDockDescription {"
                "color: %1;"
-               "font-size: 12px;"
+               "font-size: %2px;"
                "font-weight: 500;"
                "background: transparent;"
                "}")
-        .arg(colorToCss(palette.textSecondaryColor()));
+        .arg(colorToCss(palette.textSecondaryColor()),
+             numberCss(metrics.smallFontSize));
 }
 
 QString AverraStyleHelper::dockCloseButtonStyleSheet(const AverraThemePalette &palette)
 {
+    const StyleMetrics metrics = styleMetrics();
     return QStringLiteral(
                "QToolButton#AverraDockCloseButton {"
                "background-color: transparent;"
                "border: none;"
                "color: %1;"
-               "border-radius: 8px;"
-               "padding: 4px;"
+               "border-radius: %4px;"
+               "padding: %5px;"
                "}"
                "QToolButton#AverraDockCloseButton:hover {"
                "background-color: %2;"
@@ -1852,47 +2239,56 @@ QString AverraStyleHelper::dockCloseButtonStyleSheet(const AverraThemePalette &p
                "}")
         .arg(colorToCss(palette.textSecondaryColor()),
              colorToCss(palette.surfaceHoverColor()),
-             colorToCss(palette.surfacePressedColor()));
+             colorToCss(palette.surfacePressedColor()),
+             numberCss(metrics.smallRadius),
+             numberCss(compactInset(metrics)));
 }
 
 QString AverraStyleHelper::drawerFrameStyleSheet(const AverraThemePalette &palette)
 {
+    const StyleMetrics metrics = styleMetrics();
     return QStringLiteral(
                "QFrame#AverraDrawerRoot {"
                "background-color: %1;"
                "border: 1px solid %2;"
-               "border-radius: 18px;"
+               "border-radius: %3px;"
                "}")
         .arg(colorToCss(palette.surfaceRaisedColor()),
-             colorToCss(palette.borderColor()));
+             colorToCss(palette.borderColor()),
+             numberCss(metrics.panelRadius));
 }
 
 QString AverraStyleHelper::drawerTitleLabelStyleSheet(const AverraThemePalette &palette)
 {
+    const StyleMetrics metrics = styleMetrics();
     return QStringLiteral(
                "QLabel#AverraDrawerTitle {"
                "color: %1;"
-               "font-size: 16px;"
+               "font-size: %2px;"
                "font-weight: 700;"
                "background: transparent;"
                "}")
-        .arg(colorToCss(palette.textPrimaryColor()));
+        .arg(colorToCss(palette.textPrimaryColor()),
+             numberCss(metrics.titleFontSize));
 }
 
 QString AverraStyleHelper::drawerDescriptionLabelStyleSheet(const AverraThemePalette &palette)
 {
+    const StyleMetrics metrics = styleMetrics();
     return QStringLiteral(
                "QLabel#AverraDrawerDescription {"
                "color: %1;"
-               "font-size: 13px;"
+               "font-size: %2px;"
                "font-weight: 500;"
                "background: transparent;"
                "}")
-        .arg(colorToCss(palette.textSecondaryColor()));
+        .arg(colorToCss(palette.textSecondaryColor()),
+             numberCss(metrics.bodyFontSize));
 }
 
 QString AverraStyleHelper::numberRangeBoxFrameStyleSheet(const AverraThemePalette &palette, bool accentFrame)
 {
+    const StyleMetrics metrics = styleMetrics();
     QString borderColor = accentFrame ? colorToCss(palette.accentColor())
                                       : colorToCss(palette.borderColor());
 
@@ -1900,35 +2296,40 @@ QString AverraStyleHelper::numberRangeBoxFrameStyleSheet(const AverraThemePalett
                "QFrame#AverraNumberRangeBoxRoot {"
                "background-color: %1;"
                "border: 1px solid %2;"
-               "border-radius: 12px;"
+               "border-radius: %3px;"
                "}")
-        .arg(colorToCss(palette.surfaceRaisedColor()), borderColor);
+        .arg(colorToCss(palette.surfaceRaisedColor()),
+             borderColor,
+             numberCss(metrics.mediumRadius));
 }
 
 QString AverraStyleHelper::numberRangeBoxLabelStyleSheet(const AverraThemePalette &palette)
 {
+    const StyleMetrics metrics = styleMetrics();
     return QStringLiteral(
                "QLabel#AverraNumberRangeBoxLabel {"
                "color: %1;"
-               "font-size: 12px;"
+               "font-size: %2px;"
                "font-weight: 700;"
                "background: transparent;"
                "}")
-        .arg(colorToCss(palette.textSecondaryColor()));
+        .arg(colorToCss(palette.textSecondaryColor()),
+             numberCss(metrics.smallFontSize));
 }
 
 QString AverraStyleHelper::contextMenuStyleSheet(const AverraThemePalette &palette)
 {
+    const StyleMetrics metrics = styleMetrics();
     return QStringLiteral(
                "QMenu {"
                "background-color: %1;"
                "color: %2;"
                "border: 1px solid %3;"
-               "padding: 6px;"
+               "padding: %5px;"
                "}"
                "QMenu::item {"
-               "padding: 8px 20px;"
-               "border-radius: 8px;"
+               "padding: %6px %8px;"
+               "border-radius: %7px;"
                "}"
                "QMenu::item:selected {"
                "background-color: %4;"
@@ -1937,5 +2338,9 @@ QString AverraStyleHelper::contextMenuStyleSheet(const AverraThemePalette &palet
         .arg(colorToCss(palette.surfaceRaisedColor()),
              colorToCss(palette.textPrimaryColor()),
              colorToCss(palette.borderColor()),
-             colorToCss(palette.accentColor()));
+             colorToCss(palette.accentColor()),
+             numberCss(metrics.compactPaddingVertical),
+             numberCss(metrics.compactPaddingVertical + 1),
+             numberCss(metrics.smallRadius),
+             numberCss(menuItemHorizontalPadding(metrics)));
 }

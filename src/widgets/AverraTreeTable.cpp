@@ -711,13 +711,15 @@ void AverraTreeTable::initialize()
 void AverraTreeTable::refreshStyle()
 {
     const AverraThemePalette palette = AverraThemeManager::instance()->palette();
+    const AverraStyleProfile styleProfile = AverraThemeManager::instance()->styleProfile();
     setStyleSheet(AverraStyleHelper::dataTableFrameStyleSheet(palette));
     m_toolbar->setStyleSheet(AverraStyleHelper::dataTableToolbarFrameStyleSheet(palette));
     m_treeView->setStyleSheet(AverraStyleHelper::treeViewViewStyleSheet(palette));
     m_columnConfigButton->setStyleSheet(AverraStyleHelper::dataTableActionButtonStyleSheet(palette));
-    m_columnConfigPanel->setStyleSheet(QStringLiteral("QFrame#AverraTreeTableColumnConfigPanel { background-color: %1; border: 1px solid %2; border-radius: 14px; }")
+    m_columnConfigPanel->setStyleSheet(QStringLiteral("QFrame#AverraTreeTableColumnConfigPanel { background-color: %1; border: 1px solid %2; border-radius: %3px; }")
                                            .arg(palette.surfaceRaisedColor().name(),
-                                                palette.borderColor().name()));
+                                                palette.borderColor().name(),
+                                                QString::number(styleProfile.largeRadius())));
     rebuildActionCells();
 }
 

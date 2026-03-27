@@ -26,7 +26,7 @@
 - 构建系统：`CMake 3.16+` 与 `qmake 3.1`
 - 安装导出：以 `CMake find_package(AverraWidgets CONFIG REQUIRED)` 为主入口
 
-`1.0.0` 起对外承诺稳定的核心接口：
+`1.0.1` 起对外承诺稳定的核心接口：
 
 - `AverraThemePalette`
 - `AverraThemeManager`
@@ -132,7 +132,7 @@ CHANGELOG.md
 准备一个正式版本时，先执行：
 
 ```bash
-./scripts/prepare_release_record.sh --version 1.0.0 --date 2026-03-27
+./scripts/prepare_release_record.sh --version 1.0.1 --date 2026-03-27
 ```
 
 如果已经准备好了发布说明正文，也可以直接注入：
@@ -151,6 +151,28 @@ CHANGELOG.md
 与控件选型相关的说明文档位于：
 
 - `docs/SCENARIO_GUIDE.md`
+- `docs/style-profile.example.json`
+
+## GitHub 发布模式
+
+仓库已经补齐 GitHub 发布工作流：
+
+- `.github/workflows/ci.yml`：用于 `push / pull_request` 的持续集成验证
+- `.github/workflows/release.yml`：用于 `v*` tag 或手动触发的正式打包与 Release 发布
+
+推荐发布方式：
+
+```bash
+git tag v1.0.1
+git push origin v1.0.1
+```
+
+Release 工作流会自动：
+
+- 安装 `Qt 5.14.2`
+- 执行 `scripts/package_release.sh`
+- 上传 `dist/` 下的打包制品
+- 在 tag 触发时创建 GitHub Release 并附带制品
 
 ## 最小消费者工程验证
 
@@ -189,7 +211,7 @@ dist/
 其中：
 
 - `CPack` 包来自标准 `cmake --install` 安装树，适合 `find_package(AverraWidgets CONFIG REQUIRED)`
-- `qmake SDK` 包包含 `include/`、`lib/`、`AverraWidgets.pri` 和发布文档，适合传统 `qmake` 工程直接解压接入
+- `qmake SDK` 包包含 `include/`、`lib/`、`AverraWidgets.pri`、发布文档和 `style-profile.example.json`，适合传统 `qmake` 工程直接解压接入
 
 ## 建议发布顺序
 
@@ -200,4 +222,5 @@ dist/
 5. 执行 `./scripts/package_release.sh`
 6. 如需单独复检，执行 `./scripts/verify_release_consumers.sh`
 7. 核对 `dist/` 下的 `SHA256SUMS.txt`
-8. 发布制品并附带兼容说明与回滚策略
+8. 推送 `v<x.y.z>` tag 或手动触发 GitHub Release 工作流
+9. 发布制品并附带兼容说明与回滚策略

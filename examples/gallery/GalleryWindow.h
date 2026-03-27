@@ -20,8 +20,10 @@ public:
     ~GalleryWindow() override;
 
 private slots:
-    void applyOceanAccent();
-    void applyForestAccent();
+    void applyOceanTheme();
+    void applyForestTheme();
+    void applySunsetTheme();
+    void applyOrchidTheme();
     void switchCategory(int index);
     void updateCategoryGuide(const QString &text);
 
@@ -41,6 +43,8 @@ private:
 
     QPushButton *m_oceanButton;
     QPushButton *m_forestButton;
+    QPushButton *m_sunsetButton;
+    QPushButton *m_orchidButton;
     AverraSearchBar *m_categorySearchBar;
     QLabel *m_categoryHintLabel;
     AverraNavigationPanel *m_categoryNavigation;

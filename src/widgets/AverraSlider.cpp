@@ -18,7 +18,8 @@ AverraSlider::AverraSlider(QWidget *parent)
 
 QSize AverraSlider::sizeHint() const
 {
-    return QSize(320, 28);
+    const AverraStyleProfile styleProfile = AverraThemeManager::instance()->styleProfile();
+    return QSize(320, qMax(24, styleProfile.controlRadius() * 2 + 4));
 }
 
 void AverraSlider::paintEvent(QPaintEvent *event)
@@ -147,15 +148,17 @@ int AverraSlider::valueFromPosition(int x) const
 
 QRectF AverraSlider::grooveRect() const
 {
-    const qreal heightValue = 8.0;
-    const qreal margin = 12.0;
+    const AverraStyleProfile styleProfile = AverraThemeManager::instance()->styleProfile();
+    const qreal heightValue = qMax<qreal>(6.0, styleProfile.smallRadius());
+    const qreal margin = qMax<qreal>(10.0, styleProfile.compactPaddingHorizontal() + 2);
     return QRectF(margin, (height() - heightValue) / 2.0, width() - margin * 2.0, heightValue);
 }
 
 QRectF AverraSlider::handleRect() const
 {
     const QRectF groove = grooveRect();
-    const qreal handleSize = 16.0;
+    const AverraStyleProfile styleProfile = AverraThemeManager::instance()->styleProfile();
+    const qreal handleSize = qMax<qreal>(14.0, styleProfile.controlRadius() + 4);
     qreal x = groove.left() - handleSize / 2.0;
 
     if (maximum() > minimum()) {

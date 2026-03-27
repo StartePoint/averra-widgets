@@ -17,7 +17,16 @@ AverraSwitch::AverraSwitch(QWidget *parent)
 
 QSize AverraSwitch::sizeHint() const
 {
-    return QSize(52, 30);
+    const AverraStyleProfile styleProfile = AverraThemeManager::instance()->styleProfile();
+    const bool useLeadingTrafficLights = styleProfile.windowControlsLayout() == AverraStyleProfile::LeadingTrafficLights;
+
+    if (useLeadingTrafficLights) {
+        return QSize(qMax(46, (styleProfile.buttonPaddingHorizontal() * 3) + 4),
+                     qMax(26, (styleProfile.controlRadius() * 2) + 14));
+    }
+
+    return QSize(qMax(52, styleProfile.windowControlButtonWidth() + 14),
+                 qMax(30, (styleProfile.controlRadius() * 2) + 6));
 }
 
 void AverraSwitch::paintEvent(QPaintEvent *event)
@@ -25,6 +34,7 @@ void AverraSwitch::paintEvent(QPaintEvent *event)
     Q_UNUSED(event)
 
     const AverraThemePalette palette = AverraThemeManager::instance()->palette();
+    const AverraStyleProfile styleProfile = AverraThemeManager::instance()->styleProfile();
     QColor trackColor;
     QColor borderColor;
     QColor thumbColor;
@@ -61,7 +71,8 @@ void AverraSwitch::paintEvent(QPaintEvent *event)
     painter.setBrush(trackColor);
     painter.drawRoundedRect(trackRect, trackRect.height() / 2.0, trackRect.height() / 2.0);
 
-    const qreal margin = 3.0;
+    const bool useLeadingTrafficLights = styleProfile.windowControlsLayout() == AverraStyleProfile::LeadingTrafficLights;
+    const qreal margin = useLeadingTrafficLights ? 2.5 : 3.0;
     const qreal thumbSize = height() - margin * 2.0;
     qreal thumbX = margin;
 
@@ -108,5 +119,6 @@ void AverraSwitch::initialize()
 
 void AverraSwitch::handleThemeChanged()
 {
+    setFixedSize(sizeHint());
     update();
 }
