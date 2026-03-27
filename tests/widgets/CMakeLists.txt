@@ -1,0 +1,64 @@
+add_executable(AverraWidgetsTests
+    test_main.cpp
+    tst_AverraBadgeButton.cpp
+    tst_AverraButton.cpp
+    tst_AverraCard.cpp
+    tst_AverraCheckBox.cpp
+    tst_AverraComboBox.cpp
+    tst_AverraContextMenu.cpp
+    tst_AverraDataTable.cpp
+    tst_AverraDateEdit.cpp
+    tst_AverraDialog.cpp
+    tst_AverraDialogManager.cpp
+    tst_AverraDivider.cpp
+    tst_AverraDock.cpp
+    tst_AverraDrawer.cpp
+    tst_AverraEmptyState.cpp
+    tst_AverraFilterChipGroup.cpp
+    tst_AverraFormModel.cpp
+    tst_AverraFormSection.cpp
+    tst_AverraInfoBar.cpp
+    tst_AverraInspectorPanel.cpp
+    tst_AverraLineEdit.cpp
+    tst_AverraLoadingRing.cpp
+    tst_AverraNavigationPanel.cpp
+    tst_AverraNumberBox.cpp
+    tst_AverraNumberRangeBox.cpp
+    tst_AverraPagination.cpp
+    tst_AverraProgressBar.cpp
+    tst_AverraPropertyGrid.cpp
+    tst_AverraPropertyEditor.cpp
+    tst_AverraPropertyItem.cpp
+    tst_AverraRadioButton.cpp
+    tst_AverraRibbonBar.cpp
+    tst_AverraSearchBar.cpp
+    tst_AverraSegmentedControl.cpp
+    tst_AverraSectionHeader.cpp
+    tst_AverraSettingsPage.cpp
+    tst_AverraSkeleton.cpp
+    tst_AverraSlider.cpp
+    tst_AverraStatisticCard.cpp
+    tst_AverraSwitch.cpp
+    tst_AverraTabs.cpp
+    tst_AverraTag.cpp
+    tst_AverraTheme.cpp
+    tst_AverraThemeManager.cpp
+    tst_AverraTextArea.cpp
+    tst_AverraToast.cpp
+    tst_AverraToastManager.cpp
+    tst_AverraToolbar.cpp
+    tst_AverraTreeTable.cpp
+    tst_AverraTreeView.cpp
+)
+
+target_link_libraries(AverraWidgetsTests
+    PRIVATE
+        AverraWidgets
+        Qt5::Test
+        Qt5::Widgets
+)
+
+add_test(NAME AverraWidgetsTests COMMAND AverraWidgetsTests)
+set_tests_properties(AverraWidgetsTests PROPERTIES
+    ENVIRONMENT "QT_QPA_PLATFORM=offscreen"
+)

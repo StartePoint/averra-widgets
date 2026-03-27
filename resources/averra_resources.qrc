@@ -1,0 +1,6 @@
+<RCC>
+    <qresource prefix="/Averra">
+        <file>icons/averra-mark.svg</file>
+        <file>icons/chevron-down.svg</file>
+    </qresource>
+</RCC>
